@@ -117,7 +117,7 @@ class _LogInState extends State<LogIn> {
 
                                     await Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (contex) => Home(),
+                                        builder: (context) => Home(),
                                       ),
                                     );
 
