@@ -2,6 +2,7 @@ import 'package:aikeen_park/screens/log_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -43,13 +44,20 @@ showAlertDialog(BuildContext context) {
 }
 
 class _HomeState extends State<Home> {
+  late GoogleMapController mapController;
+  final LatLng _singapore = const LatLng(45.521563, -122.677433);
+
+  void _onMapCreated(GoogleMapController mapController) {
+    this.mapController = mapController;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading:
             false, //removes backarrow on extreme left of appbar
-        title: Text(
+        title: const Text(
           "AikeenPark",
         ),
         actions: [
@@ -57,8 +65,21 @@ class _HomeState extends State<Home> {
             onPressed: () {
               showAlertDialog(context);
             },
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
           )
+        ],
+      ),
+      body: Stack(
+        children: [
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: _singapore,
+              zoom: 10,
+              // tilt: 0,
+              // bearing: 0,
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -72,22 +93,6 @@ class _HomeState extends State<Home> {
             label: "Search",
           ),
         ],
-      ),
-      body: Center(
-        child: Column(
-          children: [
-            SizedBox(
-              height: 10,
-            ),
-            // ElevatedButton(
-            //   onPressed: () {
-            //     _signOut();
-            //     Navigator.pop(context);
-            //   },
-            //   child: Text("Sign out"),
-            // ),
-          ],
-        ),
       ),
     );
   }
