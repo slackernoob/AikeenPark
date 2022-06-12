@@ -1,4 +1,5 @@
 import 'package:aikeen_park/screens/log_in.dart';
+import 'package:aikeen_park/screens/search.dart';
 //import 'package:aikeen_park/screens/home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
