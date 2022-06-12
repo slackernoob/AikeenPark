@@ -57,7 +57,7 @@ class _HomeState extends State<Home> {
             onPressed: () {
               showAlertDialog(context);
             },
-            icon: Icon(Icons.settings),
+            icon: Icon(Icons.logout),
           )
         ],
       ),
@@ -79,13 +79,13 @@ class _HomeState extends State<Home> {
             SizedBox(
               height: 10,
             ),
-            ElevatedButton(
-              onPressed: () {
-                _signOut();
-                Navigator.pop(context);
-              },
-              child: Text("Sign out"),
-            ),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     _signOut();
+            //     Navigator.pop(context);
+            //   },
+            //   child: Text("Sign out"),
+            // ),
           ],
         ),
       ),
