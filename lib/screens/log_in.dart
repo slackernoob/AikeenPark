@@ -1,12 +1,13 @@
 import 'package:aikeen_park/button.dart';
 import 'package:aikeen_park/screens/home.dart';
-import 'package:aikeen_park/screens/home1.dart';
 import 'package:aikeen_park/screens/register.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:aikeen_park/constants.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import 'http.dart';
 
 class LogIn extends StatefulWidget {
   //const LogIn({Key? key}) : super(key: key);
@@ -118,7 +119,8 @@ class _LogInState extends State<LogIn> {
 
                                     await Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (context) => Home(),
+                                        builder: (context) => Http(),
+                                        // builder: (context) => Home(),
                                       ),
                                     );
 
