@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:intl/intl.dart';
 
 class Http extends StatefulWidget {
   // const Http({Key? key}) : super(key: key);
@@ -36,7 +37,39 @@ class _HttpState extends State<Http> {
       },
     );
     hugedata = jsonDecode(data.body);
-    print(hugedata["Result"]);
+    var count = 0;
+    for (Map chunk in hugedata["Result"]) {
+      print(chunk);
+      count += 1;
+    }
+    print(count);
+    // print(hugedata["Result"]);
+  }
+
+  void getData2() async {
+    //"timestamp": "2022-06-14T19:39:27+08:00",
+    //YYYY-MM-DD[T]HH:mm:ss (SGT)
+    var curTime =
+        DateFormat('yyyy-mm-ddTkk:mm:ss+08:00').format(DateTime.now());
+    Response data = await get(
+      Uri.parse("https://api.data.gov.sg/v1/transport/carpark-availability"),
+      headers: {
+        "date_time": curTime,
+      },
+    );
+    hugedata = jsonDecode(data.body);
+    var count = 0;
+    var carparkdata = hugedata["items"][0]["carpark_data"];
+    print(carparkdata);
+    for (Map chunk in carparkdata) {
+      print(chunk);
+      // print(chunk["carpark_info"]);
+      // print(chunk["carpark_number"]);
+      // print("___");
+      count += 1;
+    }
+    print(count);
+    // print(hugedata["Result"]);
   }
 
   @override
@@ -57,6 +90,12 @@ class _HttpState extends State<Http> {
                 getData();
               },
               child: Text("GetData"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                getData2();
+              },
+              child: Text("GetDataDataGovSG"),
             ),
           ],
         ),

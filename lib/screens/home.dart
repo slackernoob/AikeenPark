@@ -3,7 +3,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:google_api_headers/google_api_headers.dart';
-
+import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart' as loc;
 import 'package:aikeen_park/screens/log_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -54,9 +55,11 @@ const kGoogleApiKey = 'AIzaSyBApyJHUXxdUIBCBYkNNBPk7WuTIFVs7rE';
 final homeScaffoldKey = GlobalKey<ScaffoldState>();
 
 class _HomeState extends State<Home> {
+  //loc.Location _location = loc.Location();
+
   static const CameraPosition initialCameraPosition = CameraPosition(
     target: LatLng(1.3521, 103.8198),
-    zoom: 14.0,
+    zoom: 10.0,
   );
 
   Set<Marker> markersList = {};
@@ -87,12 +90,25 @@ class _HomeState extends State<Home> {
       body: Stack(
         children: [
           GoogleMap(
-            initialCameraPosition: initialCameraPosition,
+            initialCameraPosition:
+                initialCameraPosition, //CameraPosition(target: LatLng(_location.latitude as double, l.longitude as double) ),
             markers: markersList,
             mapType: MapType.normal,
             onMapCreated: (GoogleMapController controller) {
               googleMapController = controller;
+
+              // _location.onLocationChanged.listen((l) {
+              //   googleMapController.animateCamera(
+              //     CameraUpdate.newCameraPosition(
+              //       CameraPosition(
+              //           target:
+              //               LatLng(l.latitude as double, l.longitude as double),
+              //           zoom: 15),
+              //     ),
+              //   );
+              // });
             },
+            myLocationEnabled: true,
           ),
           // ElevatedButton(
           //   onPressed: _handlePressButton,
@@ -100,6 +116,15 @@ class _HomeState extends State<Home> {
           // )
         ],
       ),
+      // floatingActionButton: FloatingActionButton(
+      //   child: Icon(
+      //     Icons.location_searching,
+      //     color: Colors.white,
+      //   ),
+      //   onPressed: () {
+      //     _getCurrentLocation();
+      //   },
+      // ),
       bottomNavigationBar: BottomNavigationBar(
         // currentIndex: currentIndex,
         // type: BottomNavigationBarType.fixed,
