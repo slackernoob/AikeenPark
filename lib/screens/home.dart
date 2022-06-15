@@ -59,7 +59,7 @@ const kGoogleApiKey = 'AIzaSyBApyJHUXxdUIBCBYkNNBPk7WuTIFVs7rE';
 final homeScaffoldKey = GlobalKey<ScaffoldState>();
 
 class _HomeState extends State<Home> {
-  List sucthumb = [];
+  List nearbyCarparks = [];
 
   var intCounter = 0;
 
@@ -77,17 +77,12 @@ class _HomeState extends State<Home> {
           "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat}%2C${lng}&rankby=distance&type=parking&key=AIzaSyD-m4POdwpwfTtO_AtGG3bAekX3LzCt2FQ"),
       // location=lat%2Clng
     );
-    // Response data = await get(
-    //   Uri.parse(
-    //       "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=1.390021%2C103.895868&rankby=distance&type=parking&key=AIzaSyD-m4POdwpwfTtO_AtGG3bAekX3LzCt2FQ"),
-    //   // location=lat%2Clng
-    // );
     var parsed = jsonDecode(data.body);
     var carparkdata = parsed["results"];
     var counter = 0;
-    sucthumb = [];
+    nearbyCarparks = [];
     for (Map thing in carparkdata) {
-      sucthumb.add([
+      nearbyCarparks.add([
         thing["name"],
         thing["geometry"]["location"]["lat"],
         thing["geometry"]["location"]["lng"]
@@ -101,10 +96,19 @@ class _HomeState extends State<Home> {
         break;
       }
     }
-    print(sucthumb);
+    double nearbyLat;
+    double nearbyLng;
+    String nearbyName;
+    for (List lst in nearbyCarparks) {
+      nearbyName = lst[0];
+      nearbyLat = lst[1];
+      nearbyLng = lst[2];
+      addMarkers(nearbyLat, nearbyLng, intCounter, nearbyName);
+      intCounter += 1;
+    }
+    setState(() {});
+    print(nearbyCarparks);
   }
-
-  //loc.Location _location = loc.Location();
 
   static const CameraPosition initialCameraPosition = CameraPosition(
     target: LatLng(1.3521, 103.8198),
@@ -138,12 +142,6 @@ class _HomeState extends State<Home> {
           "AikeenPark",
         ),
         actions: [
-          // IconButton(
-          //   onPressed: () {
-          //     getNearby();
-          //   },
-          //   icon: const Icon(Icons.track_changes),
-          // ),
           IconButton(
             onPressed: () {
               showAlertDialog(context);
@@ -155,8 +153,7 @@ class _HomeState extends State<Home> {
       body: Stack(
         children: [
           GoogleMap(
-            initialCameraPosition:
-                initialCameraPosition, //CameraPosition(target: LatLng(_location.latitude as double, l.longitude as double) ),
+            initialCameraPosition: initialCameraPosition,
             markers: markersList,
             mapType: MapType.normal,
             onMapCreated: (GoogleMapController controller) {
@@ -176,21 +173,8 @@ class _HomeState extends State<Home> {
             myLocationEnabled: true,
             circles: circles,
           ),
-          // ElevatedButton(
-          //   onPressed: _handlePressButton,
-          //   child: const Text("Search Places"),
-          // )
         ],
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   child: Icon(
-      //     Icons.location_searching,
-      //     color: Colors.white,
-      //   ),
-      //   onPressed: () {
-      //     _getCurrentLocation();
-      //   },
-      // ),
       bottomNavigationBar: BottomNavigationBar(
         // currentIndex: currentIndex,
         // type: BottomNavigationBarType.fixed,
@@ -243,54 +227,27 @@ class _HomeState extends State<Home> {
 
     PlacesDetailsResponse detail = await places.getDetailsByPlaceId(p.placeId!);
 
-    final lat = detail.result.geometry!.location.lat;
-    final lng = detail.result.geometry!.location.lng;
+    var lat = detail.result.geometry!.location.lat;
+    var lng = detail.result.geometry!.location.lng;
 
     markersList.clear();
     markersList.add(Marker(
         markerId: const MarkerId("0"),
         position: LatLng(lat, lng),
         infoWindow: InfoWindow(title: detail.result.name)));
-
-    // BitmapDescriptor markerbitmap = await BitmapDescriptor.fromAssetImage(
-    //   ImageConfiguration(),
-    //   "assets/kisspng-drawing-pin-google-maps-pin-clip-art-pin-5ac082b161a952.8299557415225658094.png",
-    // );
-    double nearbyLat;
-    double nearbyLng;
-    String nearbyName;
     getNearby(lat, lng);
-    for (List lst in sucthumb) {
-      nearbyName = lst[0];
-      nearbyLat = lst[1];
-      nearbyLng = lst[2];
-      addMarkers(nearbyLat, nearbyLng, intCounter);
-      intCounter += 1;
-    }
-    // markersList.add(Marker(
-    //   markerId: const MarkerId("1"),
-    //   position:
-    //       LatLng(1.3433792407804779, 103.697530336985), //position of marker
-    //   infoWindow: InfoWindow(
-    //     title: 'Marker Title Second ',
-    //     snippet: 'My Custom Subtitle',
-    //   ),
-    //   icon: BitmapDescriptor.defaultMarkerWithHue(
-    //       BitmapDescriptor.hueBlue), //markerbitmap
-    // ));
-
     setState(() {});
     googleMapController
         .animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 14.0));
   }
 
-  void addMarkers(double lat, double lng, int marker_ID) {
+  void addMarkers(double lat, double lng, int marker_ID, String name) {
     markersList.add(Marker(
       markerId: MarkerId(marker_ID.toString()),
       position: LatLng(lat, lng), //position of marker
       infoWindow: InfoWindow(
-        title: lat.toString(), //'Marker Title Second ',
-        snippet: lng.toString(),
+        title: "Carpark Name", //'Marker Title Second ',
+        snippet: name,
       ),
       icon: BitmapDescriptor.defaultMarkerWithHue(
           BitmapDescriptor.hueBlue), //markerbitmap
