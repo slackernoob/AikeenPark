@@ -61,7 +61,9 @@ final homeScaffoldKey = GlobalKey<ScaffoldState>();
 class _HomeState extends State<Home> {
   List sucthumb = [];
 
-  void getNearby() async {
+  var intCounter = 0;
+
+  void getNearby(double lat, double lng) async {
     var apikey = "AIzaSyD-m4POdwpwfTtO_AtGG3bAekX3LzCt2FQ";
     // var googlePlace = GooglePlace(apikey);
     // // List<PlacesSearchResult> places = [];
@@ -72,9 +74,14 @@ class _HomeState extends State<Home> {
     // );
     Response data = await get(
       Uri.parse(
-          "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=1.390021%2C103.895868&rankby=distance&type=parking&key=AIzaSyD-m4POdwpwfTtO_AtGG3bAekX3LzCt2FQ%22"),
+          "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat}%2C${lng}&rankby=distance&type=parking&key=AIzaSyD-m4POdwpwfTtO_AtGG3bAekX3LzCt2FQ"),
       // location=lat%2Clng
     );
+    // Response data = await get(
+    //   Uri.parse(
+    //       "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=1.390021%2C103.895868&rankby=distance&type=parking&key=AIzaSyD-m4POdwpwfTtO_AtGG3bAekX3LzCt2FQ"),
+    //   // location=lat%2Clng
+    // );
     var parsed = jsonDecode(data.body);
     var carparkdata = parsed["results"];
     var counter = 0;
@@ -94,6 +101,7 @@ class _HomeState extends State<Home> {
         break;
       }
     }
+    print(sucthumb);
   }
 
   //loc.Location _location = loc.Location();
@@ -130,12 +138,18 @@ class _HomeState extends State<Home> {
           "AikeenPark",
         ),
         actions: [
+          // IconButton(
+          //   onPressed: () {
+          //     getNearby();
+          //   },
+          //   icon: const Icon(Icons.track_changes),
+          // ),
           IconButton(
             onPressed: () {
               showAlertDialog(context);
             },
             icon: const Icon(Icons.logout),
-          )
+          ),
         ],
       ),
       body: Stack(
@@ -242,14 +256,17 @@ class _HomeState extends State<Home> {
     //   ImageConfiguration(),
     //   "assets/kisspng-drawing-pin-google-maps-pin-clip-art-pin-5ac082b161a952.8299557415225658094.png",
     // );
-    double nearbyLat = 1.3433792407804779;
-    double nearbyLng = 103.697530336985;
-    int marker_ID = 1;
-    addMarkers(nearbyLat, nearbyLng, marker_ID);
-    nearbyLat -= 0.01;
-    nearbyLng -= 0.001;
-    marker_ID = 2;
-    addMarkers(nearbyLat, nearbyLng, marker_ID);
+    double nearbyLat;
+    double nearbyLng;
+    String nearbyName;
+    getNearby(lat, lng);
+    for (List lst in sucthumb) {
+      nearbyName = lst[0];
+      nearbyLat = lst[1];
+      nearbyLng = lst[2];
+      addMarkers(nearbyLat, nearbyLng, intCounter);
+      intCounter += 1;
+    }
     // markersList.add(Marker(
     //   markerId: const MarkerId("1"),
     //   position:
@@ -262,9 +279,7 @@ class _HomeState extends State<Home> {
     //       BitmapDescriptor.hueBlue), //markerbitmap
     // ));
 
-    setState(() {
-      getNearby();
-    });
+    setState(() {});
     googleMapController
         .animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 14.0));
   }
