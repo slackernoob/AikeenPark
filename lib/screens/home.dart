@@ -60,6 +60,7 @@ final homeScaffoldKey = GlobalKey<ScaffoldState>();
 
 class _HomeState extends State<Home> {
   List nearbyCarparks = [];
+  List availabilityInfo = [];
 
   var intCounter = 0;
 
@@ -85,7 +86,9 @@ class _HomeState extends State<Home> {
       nearbyCarparks.add([
         thing["name"],
         thing["geometry"]["location"]["lat"],
-        thing["geometry"]["location"]["lng"]
+        thing["geometry"]["location"]["lng"],
+        thing["geometry"]["location"]["lat"].toStringAsFixed(7),
+        thing["geometry"]["location"]["lng"].toStringAsFixed(7),
       ]);
       print(thing["name"]);
       print(thing["geometry"]["location"]["lat"]);
@@ -99,15 +102,68 @@ class _HomeState extends State<Home> {
     double nearbyLat;
     double nearbyLng;
     String nearbyName;
+    String stringLat;
+    String stringLng;
+
+    for (List info in availabilityInfo) {
+      for (List lst in nearbyCarparks) {
+        if (info[0] == lst[3] && info[1] == lst[4]) {
+          lst.add(info[2]);
+        }
+      }
+    }
+    for (List lst in nearbyCarparks) {
+      if (lst.length == 5) {
+        lst.add(-1);
+      }
+    }
     for (List lst in nearbyCarparks) {
       nearbyName = lst[0];
       nearbyLat = lst[1];
       nearbyLng = lst[2];
-      addMarkers(nearbyLat, nearbyLng, intCounter, nearbyName);
+      stringLat = nearbyLat.toStringAsFixed(7);
+      stringLng = nearbyLng.toStringAsFixed(7);
+      int availLots = lst[5];
+      addMarkers(nearbyLat, nearbyLng, intCounter, nearbyName, availLots);
+      // print(nearbyLat);
+      // print(nearbyLng);
       intCounter += 1;
     }
     setState(() {});
     print(nearbyCarparks);
+    print(availabilityInfo);
+  }
+
+  void getDataMall() async {
+    Response data = await get(
+      Uri.parse(
+          "http://datamall2.mytransport.sg/ltaodataservice/CarParkAvailabilityv2%22"),
+      headers: {
+        "AccountKey": "2AKeuSk5TNqlLiPo4jc7lg==",
+      },
+    );
+    var hugedata = jsonDecode(data.body);
+    var count = 0;
+    for (Map chunk in hugedata["value"]) {
+      var latlng = []; //["1.29115", "103.85728"]
+      latlng = chunk["Location"].split(' ');
+      print(latlng[1] + ' ' + latlng[0]);
+      double lat = double.parse(latlng[1]);
+      double lng = double.parse(latlng[0]);
+      print(lat.toStringAsFixed(7));
+      print(lng.toStringAsFixed(7));
+
+      print(chunk["AvailableLots"]);
+      count += 1;
+      availabilityInfo.add([
+        lat.toStringAsFixed(7),
+        lng.toStringAsFixed(7),
+        chunk["AvailableLots"]
+      ]);
+    }
+    print(availabilityInfo);
+    print(count);
+    // print(hugedata["Result"]);
   }
 
   static const CameraPosition initialCameraPosition = CameraPosition(
@@ -235,19 +291,22 @@ class _HomeState extends State<Home> {
         markerId: const MarkerId("0"),
         position: LatLng(lat, lng),
         infoWindow: InfoWindow(title: detail.result.name)));
+    getDataMall();
     getNearby(lat, lng);
+
     setState(() {});
     googleMapController
         .animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 14.0));
   }
 
-  void addMarkers(double lat, double lng, int marker_ID, String name) {
+  void addMarkers(
+      double lat, double lng, int marker_ID, String name, int availLots) {
     markersList.add(Marker(
       markerId: MarkerId(marker_ID.toString()),
       position: LatLng(lat, lng), //position of marker
       infoWindow: InfoWindow(
-        title: "Carpark Name", //'Marker Title Second ',
-        snippet: name,
+        title: name, //'Marker Title Second ',
+        snippet: availLots.toString(),
       ),
       icon: BitmapDescriptor.defaultMarkerWithHue(
           BitmapDescriptor.hueBlue), //markerbitmap
