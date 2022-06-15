@@ -8,6 +8,10 @@ import 'package:location/location.dart' as loc;
 import 'package:aikeen_park/screens/log_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart';
+import 'dart:convert';
+
+// import 'package:google_place/google_place.dart' as plc;
 
 import './search.dart';
 
@@ -55,6 +59,43 @@ const kGoogleApiKey = 'AIzaSyBApyJHUXxdUIBCBYkNNBPk7WuTIFVs7rE';
 final homeScaffoldKey = GlobalKey<ScaffoldState>();
 
 class _HomeState extends State<Home> {
+  List sucthumb = [];
+
+  void getNearby() async {
+    var apikey = "AIzaSyD-m4POdwpwfTtO_AtGG3bAekX3LzCt2FQ";
+    // var googlePlace = GooglePlace(apikey);
+    // // List<PlacesSearchResult> places = [];
+    // var result = await googlePlace.search.getNearBySearch(
+    //   Location(),
+    //   1500,
+    //   type: "parking",
+    // );
+    Response data = await get(
+      Uri.parse(
+          "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=1.390021%2C103.895868&rankby=distance&type=parking&key=AIzaSyD-m4POdwpwfTtO_AtGG3bAekX3LzCt2FQ%22"),
+      // location=lat%2Clng
+    );
+    var parsed = jsonDecode(data.body);
+    var carparkdata = parsed["results"];
+    var counter = 0;
+    sucthumb = [];
+    for (Map thing in carparkdata) {
+      sucthumb.add([
+        thing["name"],
+        thing["geometry"]["location"]["lat"],
+        thing["geometry"]["location"]["lng"]
+      ]);
+      print(thing["name"]);
+      print(thing["geometry"]["location"]["lat"]);
+      print(thing["geometry"]["location"]["lng"]);
+      print("__");
+      counter += 1;
+      if (counter == 5) {
+        break;
+      }
+    }
+  }
+
   //loc.Location _location = loc.Location();
 
   static const CameraPosition initialCameraPosition = CameraPosition(
@@ -67,6 +108,16 @@ class _HomeState extends State<Home> {
   late GoogleMapController googleMapController;
 
   final Mode _mode = Mode.overlay; //or fullscren
+
+  Set<Circle> circles = Set.from([
+    Circle(
+      circleId: CircleId("0"),
+      center: LatLng(1.3521, 103.8198),
+      radius: 4000,
+      fillColor: Colors.blue.shade100.withOpacity(0.6),
+      strokeColor: Colors.blue.shade100.withOpacity(0.1),
+    )
+  ]);
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +160,7 @@ class _HomeState extends State<Home> {
               // });
             },
             myLocationEnabled: true,
+            circles: circles,
           ),
           // ElevatedButton(
           //   onPressed: _handlePressButton,
@@ -186,9 +238,47 @@ class _HomeState extends State<Home> {
         position: LatLng(lat, lng),
         infoWindow: InfoWindow(title: detail.result.name)));
 
-    setState(() {});
+    // BitmapDescriptor markerbitmap = await BitmapDescriptor.fromAssetImage(
+    //   ImageConfiguration(),
+    //   "assets/kisspng-drawing-pin-google-maps-pin-clip-art-pin-5ac082b161a952.8299557415225658094.png",
+    // );
+    double nearbyLat = 1.3433792407804779;
+    double nearbyLng = 103.697530336985;
+    int marker_ID = 1;
+    addMarkers(nearbyLat, nearbyLng, marker_ID);
+    nearbyLat -= 0.01;
+    nearbyLng -= 0.001;
+    marker_ID = 2;
+    addMarkers(nearbyLat, nearbyLng, marker_ID);
+    // markersList.add(Marker(
+    //   markerId: const MarkerId("1"),
+    //   position:
+    //       LatLng(1.3433792407804779, 103.697530336985), //position of marker
+    //   infoWindow: InfoWindow(
+    //     title: 'Marker Title Second ',
+    //     snippet: 'My Custom Subtitle',
+    //   ),
+    //   icon: BitmapDescriptor.defaultMarkerWithHue(
+    //       BitmapDescriptor.hueBlue), //markerbitmap
+    // ));
 
+    setState(() {
+      getNearby();
+    });
     googleMapController
         .animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 14.0));
+  }
+
+  void addMarkers(double lat, double lng, int marker_ID) {
+    markersList.add(Marker(
+      markerId: MarkerId(marker_ID.toString()),
+      position: LatLng(lat, lng), //position of marker
+      infoWindow: InfoWindow(
+        title: lat.toString(), //'Marker Title Second ',
+        snippet: lng.toString(),
+      ),
+      icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueBlue), //markerbitmap
+    ));
   }
 }

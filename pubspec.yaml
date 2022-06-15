@@ -43,6 +43,7 @@ dependencies:
   geolocator: ^8.2.1
   csv: ^5.0.1
   location: ^4.4.0
+  google_place: ^0.4.7
 
 dev_dependencies:
   flutter_test:
@@ -72,7 +73,7 @@ flutter:
      -  assets/background1.png
      -  assets/kindacode.csv
      -  assets/hdb-carpark-information.csv
-
+     
   #   - images/a_dot_ham.jpeg
   
   # An image asset can refer to one or more resolution-specific "variants", see
