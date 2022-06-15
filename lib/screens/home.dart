@@ -87,8 +87,8 @@ class _HomeState extends State<Home> {
         thing["name"],
         thing["geometry"]["location"]["lat"],
         thing["geometry"]["location"]["lng"],
-        thing["geometry"]["location"]["lat"].toStringAsFixed(7),
-        thing["geometry"]["location"]["lng"].toStringAsFixed(7),
+        thing["geometry"]["location"]["lat"].toStringAsFixed(3),
+        thing["geometry"]["location"]["lng"].toStringAsFixed(3),
       ]);
       print(thing["name"]);
       print(thing["geometry"]["location"]["lat"]);
@@ -107,7 +107,14 @@ class _HomeState extends State<Home> {
 
     for (List info in availabilityInfo) {
       for (List lst in nearbyCarparks) {
-        if (info[0] == lst[3] && info[1] == lst[4]) {
+        // print("comparing ${info[0]} to ${lst[4]}");
+        // print(info[0].runtimeType);
+        // print(info[1].runtimeType);
+        // print(lst[2].runtimeType);
+        // print(lst[1].runtimeType);
+
+        if (((info[0] - lst[2]).abs() <= 0.0005) &&
+            ((info[1] - lst[1]).abs() <= 0.0005)) {
           lst.add(info[2]);
         }
       }
@@ -121,8 +128,8 @@ class _HomeState extends State<Home> {
       nearbyName = lst[0];
       nearbyLat = lst[1];
       nearbyLng = lst[2];
-      stringLat = nearbyLat.toStringAsFixed(7);
-      stringLng = nearbyLng.toStringAsFixed(7);
+      stringLat = nearbyLat.toStringAsFixed(3);
+      stringLng = nearbyLng.toStringAsFixed(3);
       int availLots = lst[5];
       addMarkers(nearbyLat, nearbyLng, intCounter, nearbyName, availLots);
       // print(nearbyLat);
@@ -137,27 +144,28 @@ class _HomeState extends State<Home> {
   void getDataMall() async {
     Response data = await get(
       Uri.parse(
-          "http://datamall2.mytransport.sg/ltaodataservice/CarParkAvailabilityv2%22"),
+          "http://datamall2.mytransport.sg/ltaodataservice/CarParkAvailabilityv2"),
       headers: {
         "AccountKey": "2AKeuSk5TNqlLiPo4jc7lg==",
       },
     );
     var hugedata = jsonDecode(data.body);
+    print(hugedata);
     var count = 0;
     for (Map chunk in hugedata["value"]) {
       var latlng = []; //["1.29115", "103.85728"]
       latlng = chunk["Location"].split(' ');
-      print(latlng[1] + ' ' + latlng[0]);
+      // print(latlng[1] + ' ' + latlng[0]);
       double lat = double.parse(latlng[1]);
       double lng = double.parse(latlng[0]);
-      print(lat.toStringAsFixed(7));
-      print(lng.toStringAsFixed(7));
+      // print(lat.toStringAsFixed(3));
+      // print(lng.toStringAsFixed(3));
 
       print(chunk["AvailableLots"]);
       count += 1;
       availabilityInfo.add([
-        lat.toStringAsFixed(7),
-        lng.toStringAsFixed(7),
+        lat, //.toStringAsFixed(3),
+        lng, //.toStringAsFixed(3),
         chunk["AvailableLots"]
       ]);
     }
@@ -235,6 +243,7 @@ class _HomeState extends State<Home> {
         // currentIndex: currentIndex,
         // type: BottomNavigationBarType.fixed,
         onTap: (_) {
+          getDataMall();
           _handlePressButton();
         },
         items: [
@@ -291,7 +300,7 @@ class _HomeState extends State<Home> {
         markerId: const MarkerId("0"),
         position: LatLng(lat, lng),
         infoWindow: InfoWindow(title: detail.result.name)));
-    getDataMall();
+
     getNearby(lat, lng);
 
     setState(() {});
