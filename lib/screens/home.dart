@@ -11,8 +11,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
 
-// import 'package:google_place/google_place.dart' as plc;
-
 import './search.dart';
 
 class Home extends StatefulWidget {
@@ -61,84 +59,64 @@ final homeScaffoldKey = GlobalKey<ScaffoldState>();
 class _HomeState extends State<Home> {
   List nearbyCarparks = [];
   List availabilityInfo = [];
+  List closest = [];
 
   var intCounter = 0;
 
-  void getNearby(double lat, double lng) async {
-    var apikey = "AIzaSyD-m4POdwpwfTtO_AtGG3bAekX3LzCt2FQ";
-    // var googlePlace = GooglePlace(apikey);
-    // // List<PlacesSearchResult> places = [];
-    // var result = await googlePlace.search.getNearBySearch(
-    //   Location(),
-    //   1500,
-    //   type: "parking",
-    // );
-    Response data = await get(
-      Uri.parse(
-          "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat}%2C${lng}&rankby=distance&type=parking&key=AIzaSyD-m4POdwpwfTtO_AtGG3bAekX3LzCt2FQ"),
-      // location=lat%2Clng
-    );
-    var parsed = jsonDecode(data.body);
-    var carparkdata = parsed["results"];
-    var counter = 0;
-    nearbyCarparks = [];
-    for (Map thing in carparkdata) {
-      nearbyCarparks.add([
-        thing["name"],
-        thing["geometry"]["location"]["lat"],
-        thing["geometry"]["location"]["lng"],
-        thing["geometry"]["location"]["lat"].toStringAsFixed(3),
-        thing["geometry"]["location"]["lng"].toStringAsFixed(3),
-      ]);
-      print(thing["name"]);
-      print(thing["geometry"]["location"]["lat"]);
-      print(thing["geometry"]["location"]["lng"]);
-      print("__");
-      counter += 1;
-      if (counter == 5) {
-        break;
-      }
+  void getNearby(double lat, double lng) {
+    int l = availabilityInfo.length - 1;
+    var curDist;
+    int i = 0;
+    for (i; i < l; i++) {
+      curDist = Geolocator.distanceBetween(
+        lat,
+        lng,
+        availabilityInfo[i][0],
+        availabilityInfo[i][1],
+      );
+      availabilityInfo[i].add(curDist);
     }
+    var curMin = 5000.0;
+    var cur;
+    var curIndex;
+    i = 0;
+
+    closest.clear();
+    for (int count = 0; count < 5; count++) {
+      i = 0;
+      for (i; i < l; i++) {
+        print(availabilityInfo[i]);
+        if (availabilityInfo[i].length == 5) {
+          availabilityInfo[i].add(10000.0);
+        }
+        cur = availabilityInfo[i][5];
+        if (cur <= curMin && (closest.contains(i) == false)) {
+          curMin = cur;
+          curIndex = i;
+          print("test");
+        }
+      }
+      closest.add(availabilityInfo[curIndex]);
+      availabilityInfo.removeAt(curIndex);
+      l = availabilityInfo.length;
+      curMin = 5000.0;
+    }
+
     double nearbyLat;
     double nearbyLng;
     String nearbyName;
-    String stringLat;
-    String stringLng;
 
-    for (List info in availabilityInfo) {
-      for (List lst in nearbyCarparks) {
-        // print("comparing ${info[0]} to ${lst[4]}");
-        // print(info[0].runtimeType);
-        // print(info[1].runtimeType);
-        // print(lst[2].runtimeType);
-        // print(lst[1].runtimeType);
-
-        if (((info[0] - lst[2]).abs() <= 0.0005) &&
-            ((info[1] - lst[1]).abs() <= 0.0005)) {
-          lst.add(info[2]);
-        }
-      }
-    }
-    for (List lst in nearbyCarparks) {
-      if (lst.length == 5) {
-        lst.add(-1);
-      }
-    }
-    for (List lst in nearbyCarparks) {
-      nearbyName = lst[0];
-      nearbyLat = lst[1];
-      nearbyLng = lst[2];
-      stringLat = nearbyLat.toStringAsFixed(3);
-      stringLng = nearbyLng.toStringAsFixed(3);
-      int availLots = lst[5];
+    for (List lst in closest) {
+      nearbyName = lst[3];
+      nearbyLat = lst[0];
+      nearbyLng = lst[1];
+      int availLots = lst[2];
       addMarkers(nearbyLat, nearbyLng, intCounter, nearbyName, availLots);
-      // print(nearbyLat);
-      // print(nearbyLng);
+      print(nearbyLat);
+      print(nearbyLng);
       intCounter += 1;
     }
     setState(() {});
-    print(nearbyCarparks);
-    print(availabilityInfo);
   }
 
   void getDataMall() async {
@@ -150,28 +128,23 @@ class _HomeState extends State<Home> {
       },
     );
     var hugedata = jsonDecode(data.body);
-    print(hugedata);
+    // print(hugedata);
     var count = 0;
+    availabilityInfo = [];
     for (Map chunk in hugedata["value"]) {
-      var latlng = []; //["1.29115", "103.85728"]
+      var latlng = [];
       latlng = chunk["Location"].split(' ');
-      // print(latlng[1] + ' ' + latlng[0]);
-      double lat = double.parse(latlng[1]);
-      double lng = double.parse(latlng[0]);
-      // print(lat.toStringAsFixed(3));
-      // print(lng.toStringAsFixed(3));
-
-      print(chunk["AvailableLots"]);
+      double lat = double.parse(latlng[0]);
+      double lng = double.parse(latlng[1]);
       count += 1;
       availabilityInfo.add([
-        lat, //.toStringAsFixed(3),
-        lng, //.toStringAsFixed(3),
-        chunk["AvailableLots"]
+        lat,
+        lng,
+        chunk["AvailableLots"],
+        chunk["Development"],
+        chunk["LotType"],
       ]);
     }
-    print(availabilityInfo);
-    print(count);
-    // print(hugedata["Result"]);
   }
 
   static const CameraPosition initialCameraPosition = CameraPosition(
@@ -183,7 +156,7 @@ class _HomeState extends State<Home> {
 
   late GoogleMapController googleMapController;
 
-  final Mode _mode = Mode.overlay; //or fullscren
+  final Mode _mode = Mode.overlay;
 
   Set<Circle> circles = Set.from([
     Circle(
