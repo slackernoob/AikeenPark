@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 // import 'package:google_place/google_place.dart' as plc;
 
@@ -90,10 +91,10 @@ class _HomeState extends State<Home> {
         thing["geometry"]["location"]["lat"].toStringAsFixed(3),
         thing["geometry"]["location"]["lng"].toStringAsFixed(3),
       ]);
-      print(thing["name"]);
-      print(thing["geometry"]["location"]["lat"]);
-      print(thing["geometry"]["location"]["lng"]);
-      print("__");
+      // print(thing["name"]);
+      // print(thing["geometry"]["location"]["lat"]);
+      // print(thing["geometry"]["location"]["lng"]);
+      // print("__");
       counter += 1;
       if (counter == 5) {
         break;
@@ -132,13 +133,19 @@ class _HomeState extends State<Home> {
       stringLng = nearbyLng.toStringAsFixed(3);
       int availLots = lst[5];
       addMarkers(nearbyLat, nearbyLng, intCounter, nearbyName, availLots);
+
+      // PolylinePoints polylinePoints = PolylinePoints();
+      // PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      //     apikey, );
+      // print(result.points);
+
       // print(nearbyLat);
       // print(nearbyLng);
       intCounter += 1;
     }
     setState(() {});
-    print(nearbyCarparks);
-    print(availabilityInfo);
+    // print(nearbyCarparks);
+    // print(availabilityInfo);
   }
 
   void getDataMall() async {
@@ -150,7 +157,7 @@ class _HomeState extends State<Home> {
       },
     );
     var hugedata = jsonDecode(data.body);
-    print(hugedata);
+    // print(hugedata);
     var count = 0;
     for (Map chunk in hugedata["value"]) {
       var latlng = []; //["1.29115", "103.85728"]
@@ -161,7 +168,7 @@ class _HomeState extends State<Home> {
       // print(lat.toStringAsFixed(3));
       // print(lng.toStringAsFixed(3));
 
-      print(chunk["AvailableLots"]);
+      // print(chunk["AvailableLots"]);
       count += 1;
       availabilityInfo.add([
         lat, //.toStringAsFixed(3),
@@ -169,8 +176,8 @@ class _HomeState extends State<Home> {
         chunk["AvailableLots"]
       ]);
     }
-    print(availabilityInfo);
-    print(count);
+    // print(availabilityInfo);
+    // print(count);
     // print(hugedata["Result"]);
   }
 
@@ -303,7 +310,7 @@ class _HomeState extends State<Home> {
 
     getNearby(lat, lng);
 
-    setState(() {});
+    // setState(() {});
     googleMapController
         .animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 14.0));
   }

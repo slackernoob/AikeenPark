@@ -44,6 +44,7 @@ dependencies:
   csv: ^5.0.1
   location: ^4.4.0
   google_place: ^0.4.7
+  flutter_polyline_points: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -73,7 +74,7 @@ flutter:
      -  assets/background1.png
      -  assets/kindacode.csv
      -  assets/hdb-carpark-information.csv
-     
+
   #   - images/a_dot_ham.jpeg
   
   # An image asset can refer to one or more resolution-specific "variants", see
