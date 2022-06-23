@@ -1,7 +1,8 @@
 import 'package:aikeen_park/constants.dart';
-import 'package:aikeen_park/pages/page2.dart';
+import 'package:aikeen_park/screens/userInput.dart';
 import 'package:aikeen_park/screens/directions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:google_maps_webservice/places.dart';
@@ -10,11 +11,9 @@ import 'package:geolocator/geolocator.dart';
 // import 'package:location/location.dart' as loc;
 // import 'package:aikeen_park/screens/log_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
 
-import '../pages/googlemap.dart';
 // import './search.dart';
 
 class Home2 extends StatefulWidget {
@@ -195,10 +194,10 @@ class _HomeState extends State<Home2> {
   final Mode _mode = Mode.overlay;
 
   int currIndex = 0;
-  final screens = [
-    googleMaps(), //markersList, googleMapController),
-    MyWidget(),
-  ];
+  // final screens = [
+  //   googleMaps(), //markersList, googleMapController),
+  //   MyWidget(),
+  // ];
 
   Set<Circle> circles = Set.from([
     Circle(
@@ -245,47 +244,78 @@ class _HomeState extends State<Home2> {
           ),
         ],
       ),
-      body: screens[currIndex],
-      //     GoogleMap(
-      //   initialCameraPosition: initialCameraPosition,
-      //   markers: markersList,
-      //   mapType: MapType.normal,
-      //   onMapCreated: (GoogleMapController controller) {
-      //     googleMapController = controller;
+      body: //screens[currIndex],
+          GoogleMap(
+        initialCameraPosition: initialCameraPosition,
+        markers: markersList,
+        mapType: MapType.normal,
+        onMapCreated: (GoogleMapController controller) {
+          googleMapController = controller;
 
-      //     // _location.onLocationChanged.listen((l) {
-      //     //   googleMapController.animateCamera(
-      //     //     CameraUpdate.newCameraPosition(
-      //     //       CameraPosition(
-      //     //           target:
-      //     //               LatLng(l.latitude as double, l.longitude as double),
-      //     //           zoom: 15),
-      //     //     ),
-      //     //   );
-      //     // });
-      //   },
-      //   myLocationEnabled: true,
-      //   circles: circles,
-      // ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currIndex,
-        type: BottomNavigationBarType.fixed,
-        // backgroundColor: Colors.blue,
-        // selectedItemColor: Colors.white,
-        onTap: (index) {
-          setState(() => currIndex = index);
+          // _location.onLocationChanged.listen((l) {
+          //   googleMapController.animateCamera(
+          //     CameraUpdate.newCameraPosition(
+          //       CameraPosition(
+          //           target:
+          //               LatLng(l.latitude as double, l.longitude as double),
+          //           zoom: 15),
+          //     ),
+          //   );
+          // });
         },
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: "Map",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.plus_one),
-            label: "User Input",
-          ),
+        myLocationEnabled: true,
+        //circles: circles,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: SpeedDial(
+        animatedIcon: AnimatedIcons.menu_close,
+        children: [
+          SpeedDialChild(
+              child: Icon(Icons.message),
+              label: 'User Feedback',
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => userInput(),
+                  ),
+                );
+              }),
+          SpeedDialChild(
+              child: Icon(Icons.list_alt),
+              label: 'Directions',
+              onTap: () {
+                if (closest[0][0] == null) {
+                  return;
+                }
+                _showDirections(context, closest);
+              }),
         ],
       ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   currentIndex: currIndex,
+      //   type: BottomNavigationBarType.fixed,
+      //   // backgroundColor: Colors.blue,
+      //   // selectedItemColor: Colors.white,
+      //   onTap: (_) {
+      //     if (closest[0][0] == null) {
+      //       return;
+      //     }
+      //     _showDirections(context, closest);
+      //   },
+      //   // onTap: (index) {
+      //   //   setState(() => currIndex = index);
+      //   // },
+      //   items: [
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.map),
+      //       label: "Map",
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.plus_one),
+      //       label: "User Input",
+      //     ),
+      //   ],
+      // ),
     );
   }
 

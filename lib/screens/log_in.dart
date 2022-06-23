@@ -1,6 +1,6 @@
 import 'package:aikeen_park/button.dart';
 import 'package:aikeen_park/csv.dart';
-import 'package:aikeen_park/screens/home.dart';
+// import 'package:aikeen_park/screens/home.dart';
 import 'package:aikeen_park/screens/realhome.dart';
 import 'package:aikeen_park/screens/register.dart';
 import 'package:firebase_auth/firebase_auth.dart';
