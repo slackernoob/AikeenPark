@@ -8,19 +8,20 @@ import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:google_api_headers/google_api_headers.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 // import 'package:location/location.dart' as loc;
 // import 'package:aikeen_park/screens/log_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 // import './search.dart';
 
-class Home2 extends StatefulWidget {
-  const Home2({Key? key}) : super(key: key);
+class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
 
   @override
-  State<Home2> createState() => _HomeState();
+  State<Home> createState() => _HomeState();
 }
 
 Future<void> _signOut() async {
@@ -55,13 +56,15 @@ showAlertDialog(BuildContext context) {
       });
 }
 
-void _showDirections(BuildContext ctx, List closest) {
+void _showDirections(BuildContext ctx, List closest, Function _goToPlace,
+    Function _setPolyline) {
   showModalBottomSheet(
       context: ctx,
       builder: (_) {
         return Container(
           height: MediaQuery.of(ctx).size.height * 0.3,
-          child: showDirections(closest),
+          child: showDirections(closest, _goToPlace, _setPolyline,
+              _polylineIdCounter, _polylines),
         );
       });
 }
@@ -72,26 +75,15 @@ const CameraPosition initialCameraPosition = CameraPosition(
 );
 
 Set<Marker> markersList = {};
+Set<Polyline> _polylines = Set<Polyline>();
+
+int _polylineIdCounter = 1;
 
 late GoogleMapController googleMapController;
 
-Widget googleMaps() {
-  return GoogleMap(
-    initialCameraPosition: initialCameraPosition,
-    markers: markersList,
-    mapType: MapType.normal,
-    onMapCreated: (GoogleMapController controller) {
-      googleMapController = controller;
-    },
-    myLocationEnabled: true,
-  );
-}
-
-// const kGoogleApiKey = 'AIzaSyBApyJHUXxdUIBCBYkNNBPk7WuTIFVs7rE';
-
 final homeScaffoldKey = GlobalKey<ScaffoldState>();
 
-class _HomeState extends State<Home2> {
+class _HomeState extends State<Home> {
   List nearbyCarparks = [];
   List availabilityInfo = [];
   List closest = [];
@@ -151,11 +143,12 @@ class _HomeState extends State<Home2> {
       // print(nearbyLng);
       intCounter += 1;
     }
+    print(closest);
     setState(() {});
   }
 
   void getDataMall() async {
-    Response data = await get(
+    http.Response data = await http.get(
       Uri.parse(
           "http://datamall2.mytransport.sg/ltaodataservice/CarParkAvailabilityv2"),
       headers: {
@@ -182,32 +175,17 @@ class _HomeState extends State<Home2> {
     }
   }
 
-  // static const CameraPosition initialCameraPosition = CameraPosition(
-  //   target: LatLng(1.3521, 103.8198),
-  //   zoom: 10.0,
-  // );
-
-  // Set<Marker> markersList = {};
-
-  // late GoogleMapController googleMapController;
-
   final Mode _mode = Mode.overlay;
 
-  int currIndex = 0;
-  // final screens = [
-  //   googleMaps(), //markersList, googleMapController),
-  //   MyWidget(),
-  // ];
-
-  Set<Circle> circles = Set.from([
-    Circle(
-      circleId: CircleId("0"),
-      center: LatLng(1.3521, 103.8198),
-      radius: 4000,
-      fillColor: Colors.blue.shade100.withOpacity(0.6),
-      strokeColor: Colors.blue.shade100.withOpacity(0.1),
-    )
-  ]);
+  // Set<Circle> circles = Set.from([
+  //   Circle(
+  //     circleId: CircleId("0"),
+  //     center: LatLng(1.3521, 103.8198),
+  //     radius: 4000,
+  //     fillColor: Colors.blue.shade100.withOpacity(0.6),
+  //     strokeColor: Colors.blue.shade100.withOpacity(0.1),
+  //   )
+  // ]);
 
   @override
   Widget build(BuildContext context) {
@@ -220,15 +198,6 @@ class _HomeState extends State<Home2> {
           "AikeenPark",
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              if (closest[0][0] == null) {
-                return;
-              }
-              _showDirections(context, closest);
-            },
-            icon: const Icon(Icons.list),
-          ),
           IconButton(
             onPressed: () {
               getDataMall();
@@ -244,10 +213,10 @@ class _HomeState extends State<Home2> {
           ),
         ],
       ),
-      body: //screens[currIndex],
-          GoogleMap(
+      body: GoogleMap(
         initialCameraPosition: initialCameraPosition,
         markers: markersList,
+        polylines: _polylines,
         mapType: MapType.normal,
         onMapCreated: (GoogleMapController controller) {
           googleMapController = controller;
@@ -264,7 +233,6 @@ class _HomeState extends State<Home2> {
           // });
         },
         myLocationEnabled: true,
-        //circles: circles,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: SpeedDial(
@@ -282,40 +250,26 @@ class _HomeState extends State<Home2> {
               }),
           SpeedDialChild(
               child: Icon(Icons.list_alt),
-              label: 'Directions',
+              label: 'Carpark List',
               onTap: () {
                 if (closest[0][0] == null) {
                   return;
                 }
-                _showDirections(context, closest);
+                _showDirections(
+                  context,
+                  closest,
+                  _goToPlace,
+                  _setPolyline,
+                );
+              }),
+          SpeedDialChild(
+              child: Icon(Icons.route),
+              label: 'Show Route',
+              onTap: () {
+                setState(() {});
               }),
         ],
       ),
-      // bottomNavigationBar: BottomNavigationBar(
-      //   currentIndex: currIndex,
-      //   type: BottomNavigationBarType.fixed,
-      //   // backgroundColor: Colors.blue,
-      //   // selectedItemColor: Colors.white,
-      //   onTap: (_) {
-      //     if (closest[0][0] == null) {
-      //       return;
-      //     }
-      //     _showDirections(context, closest);
-      //   },
-      //   // onTap: (index) {
-      //   //   setState(() => currIndex = index);
-      //   // },
-      //   items: [
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.map),
-      //       label: "Map",
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.plus_one),
-      //       label: "User Input",
-      //     ),
-      //   ],
-      // ),
     );
   }
 
@@ -351,21 +305,57 @@ class _HomeState extends State<Home2> {
 
     PlacesDetailsResponse detail = await places.getDetailsByPlaceId(p.placeId!);
 
-    var lat = detail.result.geometry!.location.lat;
-    var lng = detail.result.geometry!.location.lng;
+    var Lat = detail.result.geometry!.location.lat;
+    var Lng = detail.result.geometry!.location.lng;
 
     markersList.clear();
 
-    getNearby(lat, lng);
+    getNearby(Lat, Lng);
 
     markersList.add(Marker(
         markerId: const MarkerId("0"),
-        position: LatLng(lat, lng),
+        position: LatLng(Lat, Lng),
         infoWindow: InfoWindow(title: detail.result.name)));
     setState(() {});
     googleMapController
-        .animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 14.0));
+        .animateCamera(CameraUpdate.newLatLngZoom(LatLng(Lat, Lng), 14.0));
   }
+
+  Future<void> _goToPlace(
+    double lat,
+    double lng,
+    Map<String, dynamic> boundsNe,
+    Map<String, dynamic> boundsSw,
+  ) async {
+    // googleMapController
+    //     .animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 14.0));
+    googleMapController.animateCamera(CameraUpdate.newLatLngBounds(
+      LatLngBounds(
+        southwest: LatLng(boundsSw['lat'], boundsSw['lng']),
+        northeast: LatLng(boundsNe['lat'], boundsNe['lng']),
+      ),
+      25,
+    ));
+  }
+
+  // Future<Map<String, dynamic>> getDirections(
+  //     String origin, String destination) async {
+  //   final String url =
+  //       'https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&key=$kGoogleApiKey';
+  //   var response = await http.get(Uri.parse(url));
+  //   var json = jsonDecode(response.body);
+
+  //   var results = {
+  //     'bounds_ne': json['routes'][0]['bounds']['northeast'],
+  //     'bounds_sw': json['routes'][0]['bounds']['southwest'],
+  //     'start_location': json['routes'][0]['legs'][0]['start_location'],
+  //     'end_location': json['routes'][0]['legs'][0]['end_location'],
+  //     'polyline': json['routes'][0]['overview_polyline']['points'],
+  //     'polyline_decoded': PolylinePoints()
+  //         .decodePolyline(json['routes'][0]['overview_polyline']['points']),
+  //   };
+  //   return results;
+  // }
 
   void addMarkers(
       double lat, double lng, int marker_ID, String name, int availLots) {
@@ -380,5 +370,22 @@ class _HomeState extends State<Home2> {
       icon: BitmapDescriptor.defaultMarkerWithHue(
           BitmapDescriptor.hueBlue), //markerbitmap
     ));
+  }
+
+  void _setPolyline(List<PointLatLng> points) {
+    final String polylineIdVal = 'polyline_$_polylineIdCounter';
+    _polylineIdCounter += 1;
+    _polylines.add(
+      Polyline(
+        polylineId: PolylineId(polylineIdVal),
+        width: 2,
+        color: Colors.red,
+        points: points
+            .map(
+              (points) => LatLng(points.latitude, points.longitude),
+            )
+            .toList(),
+      ),
+    );
   }
 }
