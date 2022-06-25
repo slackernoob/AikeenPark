@@ -46,6 +46,7 @@ dependencies:
   google_place: ^0.4.7
   flutter_polyline_points: ^1.0.0
   flutter_speed_dial: ^6.0.0
+  permission_handler: ^10.0.0
 
 dev_dependencies:
   flutter_test:

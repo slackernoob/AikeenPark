@@ -15,6 +15,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:permission_handler/permission_handler.dart';
+
 // import './search.dart';
 
 class Home extends StatefulWidget {
@@ -143,7 +145,7 @@ class _HomeState extends State<Home> {
       // print(nearbyLng);
       intCounter += 1;
     }
-    print(closest);
+    // print(closest);
     setState(() {});
   }
 
@@ -197,6 +199,7 @@ class _HomeState extends State<Home> {
         title: const Text(
           "AikeenPark",
         ),
+        backgroundColor: Colors.brown[400],
         actions: [
           IconButton(
             onPressed: () {
@@ -220,6 +223,7 @@ class _HomeState extends State<Home> {
         mapType: MapType.normal,
         onMapCreated: (GoogleMapController controller) {
           googleMapController = controller;
+          request();
 
           // _location.onLocationChanged.listen((l) {
           //   googleMapController.animateCamera(
@@ -233,8 +237,10 @@ class _HomeState extends State<Home> {
           // });
         },
         myLocationEnabled: true,
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.1),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: SpeedDial(
         animatedIcon: AnimatedIcons.menu_close,
         children: [
@@ -261,12 +267,6 @@ class _HomeState extends State<Home> {
                   _goToPlace,
                   _setPolyline,
                 );
-              }),
-          SpeedDialChild(
-              child: Icon(Icons.route),
-              label: 'Show Route',
-              onTap: () {
-                setState(() {});
               }),
         ],
       ),
@@ -316,6 +316,8 @@ class _HomeState extends State<Home> {
         markerId: const MarkerId("0"),
         position: LatLng(Lat, Lng),
         infoWindow: InfoWindow(title: detail.result.name)));
+
+    _polylines.clear();
     setState(() {});
     googleMapController
         .animateCamera(CameraUpdate.newLatLngZoom(LatLng(Lat, Lng), 14.0));
@@ -336,6 +338,7 @@ class _HomeState extends State<Home> {
       ),
       25,
     ));
+    setState(() {});
   }
 
   // Future<Map<String, dynamic>> getDirections(
@@ -366,7 +369,9 @@ class _HomeState extends State<Home> {
         title: name, //'Marker Title Second ',
         snippet: 'Carpark Lots: ' + availLots.toString(),
       ),
-      // onTap: () {},
+      onTap: () {
+        // _showDirections(ctx, closest, _goToPlace, _setPolyline);
+      },
       icon: BitmapDescriptor.defaultMarkerWithHue(
           BitmapDescriptor.hueBlue), //markerbitmap
     ));
@@ -387,5 +392,17 @@ class _HomeState extends State<Home> {
             .toList(),
       ),
     );
+  }
+
+  void request() async {
+    bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+
+    await Geolocator.checkPermission();
+    await Geolocator.requestPermission();
+
+    // Ask permission from device
+    Future<void> requestPermission() async {
+      await Permission.location.request();
+    }
   }
 }

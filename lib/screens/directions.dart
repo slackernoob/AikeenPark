@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class showDirections extends StatefulWidget {
   // const showDirections({Key? key}) : super(key: key);
@@ -24,6 +25,12 @@ class showDirections extends StatefulWidget {
 
 class _showDirectionsState extends State<showDirections> {
   late Position _currentPosition;
+
+  @override
+  void initState() {
+    _getCurrentLocation();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,14 +87,15 @@ class _showDirectionsState extends State<showDirections> {
               ),
               RaisedButton(
                   color: Colors.white,
-                  child: Text("Navigate"),
+                  child: Text("Select route"),
                   onPressed: () async {
                     widget._polylines.clear();
                     _getCurrentLocation();
-
+                    // locatePosition();
                     var directions = await getDirections(
-                      _currentPosition.latitude.toString(),
-                      _currentPosition.longitude.toString(),
+                      _currentPosition,
+                      // _currentPosition.latitude.toString(),
+                      // _currentPosition.longitude.toString(),
                       widget.closest[i][0].toString(),
                       widget.closest[i][1].toString(),
                     );
@@ -110,12 +118,12 @@ class _showDirectionsState extends State<showDirections> {
   }
 
   Future<Map<String, dynamic>> getDirections(
-      String currLat, String currLng, String destLat, String destLng) async {
+      Position currPosition, String destLat, String destLng) async {
     final String url =
         'https://maps.googleapis.com/maps/api/directions/json?origin=' +
-            currLat +
+            currPosition.latitude.toString() +
             ',' +
-            currLng +
+            currPosition.longitude.toString() +
             '&destination=' +
             destLat +
             ',' +
@@ -142,11 +150,27 @@ class _showDirectionsState extends State<showDirections> {
             desiredAccuracy: LocationAccuracy.best,
             forceAndroidLocationManager: true)
         .then((Position position) {
-      setState(() {
-        _currentPosition = position;
-      });
+      _currentPosition = position;
     }).catchError((e) {
       print(e);
     });
   }
+
+  // Future<Position> locatePosition() async {
+  //   // bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+
+  //   // await Geolocator.checkPermission();
+  //   // await Geolocator.requestPermission();
+
+  //   Position position = await Geolocator.getCurrentPosition(
+  //       desiredAccuracy: LocationAccuracy.high);
+
+  //   return position;
+  //   // LatLng latLngPosition = LatLng(position.latitude, position.longitude);
+
+  //   // Ask permission from device
+  //   // Future<void> requestPermission() async {
+  //   //   await Permission.location.request();
+  //   // }
+  // }
 }
