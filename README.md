@@ -18,6 +18,6 @@ Follow the instructions at https://docs.flutter.dev/get-started/install, https:/
 
 2. In your chosen IDE, get all the dependencies using `flutter pub get` in the terminal in your IDE
 
-3. Start your preferred AVD on your machine through Android Emulator.
+3. Start your preferred AVD on your machine through Android Emulator. Set the current location on the AVD to somewhere within Singapore.
 
 4. Run the app using `flutter run` in the terminal in your IDE
