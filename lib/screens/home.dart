@@ -403,6 +403,7 @@ class _HomeState extends State<Home> {
     // Ask permission from device
     Future<void> requestPermission() async {
       await Permission.location.request();
+      await Permission.locationWhenInUse.request();
     }
   }
 }
