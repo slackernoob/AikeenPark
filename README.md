@@ -1,16 +1,23 @@
 # aikeen_park
 
-A new Flutter project.
+## About the Project
+
+The AikeenPark app aims to provide Singaporeans greater flexibility in planning their destinations, by providing live parking availability data and routing from current location to selected carpark.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+To test the app, you will need to have the Flutter SDK, an Android Virtual Device (AVD) and Android Studio installed on your machine.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Follow the instructions at https://docs.flutter.dev/get-started/install, https://developer.android.com/studio and https://developer.android.com/studio/run/managing-avds to get it set up.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Installation
+
+1. Clone the repo `git clone https://git@github.com:maxangyuejun/AikeenPark.git`
+
+2. In your chosen IDE, get all the dependencies using `flutter pub get` in the terminal in your IDE
+
+3. Start your preferred AVD on your machine through Android Emulator. Set the current location on the AVD to somewhere within Singapore.
+
+4. Run the app using `flutter run` in the terminal in your IDE
