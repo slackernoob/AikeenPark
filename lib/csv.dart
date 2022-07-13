@@ -3,24 +3,23 @@ import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:csv/csv.dart';
 
-class csv extends StatefulWidget {
-  const csv({Key? key}) : super(key: key);
+class Csv extends StatefulWidget {
+  const Csv({Key? key}) : super(key: key);
 
   @override
-  State<csv> createState() => _csvState();
+  State<Csv> createState() => _CsvState();
 }
 
-class _csvState extends State<csv> {
+class _CsvState extends State<Csv> {
   List<List<dynamic>> _data = [];
 
   // This function is triggered when the floating button is pressed
   void _loadCSV() async {
-    final _rawData =
+    final rawData =
         await rootBundle.loadString("assets/hdb-carpark-information.csv");
-    List<List<dynamic>> _listData =
-        const CsvToListConverter().convert(_rawData);
+    List<List<dynamic>> listData = const CsvToListConverter().convert(rawData);
     setState(() {
-      _data = _listData;
+      _data = listData;
     });
   }
 
@@ -46,7 +45,7 @@ class _csvState extends State<csv> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.add), onPressed: _loadCSV),
+          onPressed: _loadCSV, child: const Icon(Icons.add)),
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:aikeen_park/button.dart';
 import 'package:aikeen_park/csv.dart';
-// import 'package:aikeen_park/screens/home.dart';
 import 'package:aikeen_park/screens/home.dart';
 import 'package:aikeen_park/screens/register.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -32,14 +31,19 @@ class _LogInState extends State<LogIn> {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Colors.brown[400],
-        elevation: 0.0,
+        elevation: 20.0,
         title: Text(
-            style: GoogleFonts.getFont(
-                fontSize: 40, color: Colors.pink[200], 'Lobster'),
+            // style: GoogleFonts.getFont(
+            //     fontSize: 40, color: Colors.pink[200], 'Lobster'),
+            // 'AikeenPark'),
+            style: GoogleFonts.montserrat(
+              fontSize: 33,
+              color: Colors.white,
+            ),
             'AikeenPark'),
       ),
       body: isloading
-          ? Center(
+          ? const Center(
               child: CircularProgressIndicator(),
             )
           : Form(
@@ -52,17 +56,17 @@ class _LogInState extends State<LogIn> {
                       decoration: BoxDecoration(
                         image: DecorationImage(
                             colorFilter: ColorFilter.mode(
-                                Colors.white.withOpacity(0.8),
+                                Colors.lightBlue.withOpacity(0.8),
                                 BlendMode.modulate),
-                            image: AssetImage("assets/background1.png"),
+                            image: const AssetImage("assets/background1.png"),
                             fit: BoxFit.cover),
                       ),
                       height: double.infinity,
                       width: double.infinity,
                       //color: Colors.grey[200],
                       child: SingleChildScrollView(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 25, vertical: 300),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 25, vertical: 200),
                         child: Column(
                           children: [
                             TextFormField(
@@ -74,25 +78,25 @@ class _LogInState extends State<LogIn> {
                                 if (value!.isEmpty) {
                                   return "Please enter Email";
                                 }
+                                return null;
                               },
                               textAlign: TextAlign.center,
                               decoration: kTextFieldDecoration.copyWith(
                                 filled: true,
                                 fillColor: Colors.white60,
                                 hintText: 'Email',
-                                prefixIcon: Icon(
-                                  Icons.email,
-                                  color: Colors.black,
-                                ),
+                                prefixIcon: const Icon(Icons.email,
+                                    color: Colors.black),
                               ),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             TextFormField(
                               obscureText: true,
                               validator: (value) {
                                 if (value!.isEmpty) {
                                   return "Please enter Password";
                                 }
+                                return null;
                               },
                               onChanged: (value) {
                                 password = value;
@@ -102,12 +106,10 @@ class _LogInState extends State<LogIn> {
                                   filled: true,
                                   fillColor: Colors.white60,
                                   hintText: 'Password',
-                                  prefixIcon: Icon(
-                                    Icons.lock,
-                                    color: Colors.black,
-                                  )),
+                                  prefixIcon: const Icon(Icons.lock,
+                                      color: Colors.black)),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             CustomButton(
                               title: 'Login',
                               onPoke: () async {
@@ -121,7 +123,7 @@ class _LogInState extends State<LogIn> {
 
                                     await Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (context) => Home(),
+                                        builder: (context) => const Home(),
                                       ),
                                     );
 
@@ -132,14 +134,14 @@ class _LogInState extends State<LogIn> {
                                     showDialog(
                                       context: context,
                                       builder: (ctx) => AlertDialog(
-                                        title: Text("Ops! Login Failed"),
+                                        title: const Text("Oops! Login Failed"),
                                         content: Text('${e.message}'),
                                         actions: [
                                           TextButton(
                                             onPressed: () {
                                               Navigator.of(ctx).pop();
                                             },
-                                            child: Text('Okay'),
+                                            child: const Text('Okay'),
                                           )
                                         ],
                                       ),
@@ -152,12 +154,13 @@ class _LogInState extends State<LogIn> {
                                 }
                               },
                             ),
-                            SizedBox(height: 30),
+                            const SizedBox(height: 30),
                             GestureDetector(
                               onTap: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => RegisterScreen(),
+                                    builder: (context) =>
+                                        const RegisterScreen(),
                                   ),
                                 );
                               },
@@ -169,8 +172,8 @@ class _LogInState extends State<LogIn> {
                                     style: TextStyle(
                                         fontSize: 20, color: Colors.lime[100]),
                                   ),
-                                  SizedBox(width: 10),
-                                  Hero(
+                                  const SizedBox(width: 10),
+                                  const Hero(
                                     tag: '1',
                                     child: Text(
                                       'Sign up',

@@ -1,8 +1,10 @@
 import 'package:aikeen_park/constants.dart';
+import 'package:aikeen_park/screens/favorite.dart';
 import 'package:aikeen_park/screens/userInput.dart';
 import 'package:aikeen_park/screens/directions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:google_maps_webservice/places.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:permission_handler/permission_handler.dart';
 
@@ -58,15 +61,28 @@ showAlertDialog(BuildContext context) {
       });
 }
 
-void _showDirections(BuildContext ctx, List closest, Function _goToPlace,
-    Function _setPolyline) {
+late Position _currentPosition;
+
+_getCurrentLocation() {
+  Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best,
+          forceAndroidLocationManager: true)
+      .then((Position position) {
+    _currentPosition = position;
+  }).catchError((e) {
+    print(e);
+  });
+}
+
+void _showDirections(BuildContext ctx, List closest, Function goToMarker,
+    Function moveCamera, String dropdownvalue, Function setPolyline) {
   showModalBottomSheet(
       context: ctx,
       builder: (_) {
-        return Container(
+        return SizedBox(
           height: MediaQuery.of(ctx).size.height * 0.3,
-          child: showDirections(closest, _goToPlace, _setPolyline,
-              _polylineIdCounter, _polylines),
+          child: showDirections(closest, goToMarker, moveCamera, setPolyline,
+              dropdownvalue, _polylines, _currentPosition, _getCurrentLocation),
         );
       });
 }
@@ -77,7 +93,7 @@ const CameraPosition initialCameraPosition = CameraPosition(
 );
 
 Set<Marker> markersList = {};
-Set<Polyline> _polylines = Set<Polyline>();
+Set<Polyline> _polylines = <Polyline>{}; //Set<Polyline>();
 
 int _polylineIdCounter = 1;
 
@@ -90,14 +106,15 @@ class _HomeState extends State<Home> {
   List availabilityInfo = [];
   List closest = [];
 
+  List urmum = [];
+
   var intCounter = 0;
 
   void getNearby(double lat, double lng) {
-    int l = availabilityInfo.length - 1;
-    var curDist;
+    int l = availabilityInfo.length; // -1;
     int i = 0;
     for (i; i < l; i++) {
-      curDist = Geolocator.distanceBetween(
+      var curDist = Geolocator.distanceBetween(
         lat,
         lng,
         availabilityInfo[i][0],
@@ -105,47 +122,30 @@ class _HomeState extends State<Home> {
       );
       availabilityInfo[i].add(curDist);
     }
-    var curMin = 5000.0;
-    var cur;
-    var curIndex;
-    i = 0;
+    availabilityInfo.sort((a, b) => a[5].compareTo(b[5]));
 
     closest.clear();
-    for (int count = 0; count < 5; count++) {
-      i = 0;
-      for (i; i < l; i++) {
-        // print(availabilityInfo[i]);
-        if (availabilityInfo[i].length == 5) {
-          availabilityInfo[i].add(10000.0);
-        }
-        cur = availabilityInfo[i][5];
-        if (cur <= curMin && (closest.contains(i) == false)) {
-          curMin = cur;
-          curIndex = i;
-          // print("test");
-        }
-      }
-      closest.add(availabilityInfo[curIndex]);
-      availabilityInfo.removeAt(curIndex);
-      l = availabilityInfo.length;
-      curMin = 5000.0;
+    for (int i = 0; i < int.parse(dropdownvalue); i++) {
+      closest.add(availabilityInfo[i]);
     }
 
     double nearbyLat;
     double nearbyLng;
     String nearbyName;
+    String parkingType;
 
     for (List lst in closest) {
       nearbyName = lst[3];
       nearbyLat = lst[0];
       nearbyLng = lst[1];
       int availLots = lst[2];
-      addMarkers(nearbyLat, nearbyLng, intCounter, nearbyName, availLots);
+      parkingType = lst[4];
+      addMarkers(
+          nearbyLat, nearbyLng, intCounter, nearbyName, availLots, parkingType);
       // print(nearbyLat);
       // print(nearbyLng);
       intCounter += 1;
     }
-    // print(closest);
     setState(() {});
   }
 
@@ -159,14 +159,14 @@ class _HomeState extends State<Home> {
     );
     var hugedata = jsonDecode(data.body);
     // print(hugedata);
-    var count = 0;
+    // var count = 0;
     availabilityInfo = [];
     for (Map chunk in hugedata["value"]) {
       var latlng = [];
       latlng = chunk["Location"].split(' ');
       double lat = double.parse(latlng[0]);
       double lng = double.parse(latlng[1]);
-      count += 1;
+      // count += 1;
       availabilityInfo.add([
         lat,
         lng,
@@ -189,6 +189,30 @@ class _HomeState extends State<Home> {
   //   )
   // ]);
 
+  bool switchValue = false;
+  bool isVisible = true;
+
+  // Initial Selected Value
+  String dropdownvalue = '5';
+
+  // List of items in our dropdown menu
+  var items = [
+    '5',
+    '10',
+    '15',
+    '20',
+  ];
+
+  // late Position _currentPosition;
+
+  @override
+  void initState() {
+    super.initState();
+    markersList.clear();
+    _polylines.clear();
+    _getCurrentLocation();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,11 +220,51 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         automaticallyImplyLeading:
             false, //removes backarrow on extreme left of appbar
-        title: const Text(
+        title: Text(
+          style: GoogleFonts.montserrat(
+            fontSize: 30,
+            color: Colors.white,
+          ),
           "AikeenPark",
         ),
         backgroundColor: Colors.brown[400],
         actions: [
+          // Visibility(
+          //   visible: isVisible,
+          //   child: IconButton(
+          //     onPressed: () {},
+          //     icon: const Icon(Icons.developer_mode),
+          //   ),
+          // ),
+          // Switch(
+          //   value: switchValue,
+          //   onChanged: (value) {
+          //     switchValue = value;
+          //     isVisible = !isVisible;
+          //     setState(() {});
+          //   },
+          // ),
+          DropdownButton(
+            value: dropdownvalue,
+            dropdownColor: Colors.brown,
+            style: const TextStyle(color: Colors.white),
+            icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+            items: items.map((String items) {
+              return DropdownMenuItem(
+                value: items,
+                child: Text(
+                  items,
+                  // style: const TextStyle(color: Colors.white),
+                ),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                dropdownvalue = newValue!;
+              });
+            },
+            onTap: () {},
+          ),
           IconButton(
             onPressed: () {
               getDataMall();
@@ -220,9 +284,11 @@ class _HomeState extends State<Home> {
         initialCameraPosition: initialCameraPosition,
         markers: markersList,
         polylines: _polylines,
-        mapType: MapType.normal,
+        mapType: MapType.hybrid,
         onMapCreated: (GoogleMapController controller) {
           googleMapController = controller;
+          markersList.clear;
+          _polylines.clear;
           request();
 
           // _location.onLocationChanged.listen((l) {
@@ -243,9 +309,25 @@ class _HomeState extends State<Home> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: SpeedDial(
         animatedIcon: AnimatedIcons.menu_close,
+        backgroundColor: Colors.brown[400],
+        overlayColor: Colors.brown[50],
+        overlayOpacity: 0.4,
+        spacing: 8,
+        spaceBetweenChildren: 8,
         children: [
           SpeedDialChild(
-              child: Icon(Icons.message),
+              child: const Icon(Icons.my_location, color: Colors.brown),
+              label: 'Search around User',
+              onTap: () {
+                getDataMall();
+                async1();
+                // print(closest);
+                // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                //   content: Text("Sending Message"),
+                // ));
+              }),
+          SpeedDialChild(
+              child: const Icon(Icons.feedback, color: Colors.brown),
               label: 'User Feedback',
               onTap: () {
                 Navigator.of(context).push(
@@ -255,7 +337,7 @@ class _HomeState extends State<Home> {
                 );
               }),
           SpeedDialChild(
-              child: Icon(Icons.list_alt),
+              child: const Icon(Icons.list_alt, color: Colors.brown),
               label: 'Carpark List',
               onTap: () {
                 if (closest[0][0] == null) {
@@ -264,8 +346,31 @@ class _HomeState extends State<Home> {
                 _showDirections(
                   context,
                   closest,
-                  _goToPlace,
+                  _goToMarker,
+                  moveCamera,
+                  dropdownvalue,
                   _setPolyline,
+                );
+              }),
+          SpeedDialChild(
+              child: const Icon(Icons.clear, color: Colors.brown),
+              label: 'Clear All',
+              onTap: () {
+                _showAlert(context);
+              }
+              // closest.clear();
+              // markersList.clear();
+              // _polylines.clear();
+              // setState(() {});
+              ),
+          SpeedDialChild(
+              child: const Icon(Icons.bookmarks, color: Colors.brown),
+              label: 'Bookmarks',
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const MyFavorites(),
+                  ),
                 );
               }),
         ],
@@ -286,14 +391,15 @@ class _HomeState extends State<Home> {
             hintText: 'Search',
             focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide(color: Colors.white))),
+                borderSide: const BorderSide(color: Colors.white))),
         components: [Component(Component.country, "Sg")]);
 
     displayPrediction(p!, homeScaffoldKey.currentState);
   }
 
   void onError(PlacesAutocompleteResponse response) {
-    homeScaffoldKey.currentState!
+    // homeScaffoldKey.currentState!
+    ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(response.errorMessage!)));
   }
 
@@ -305,25 +411,26 @@ class _HomeState extends State<Home> {
 
     PlacesDetailsResponse detail = await places.getDetailsByPlaceId(p.placeId!);
 
-    var Lat = detail.result.geometry!.location.lat;
-    var Lng = detail.result.geometry!.location.lng;
+    var lat = detail.result.geometry!.location.lat;
+    var lng = detail.result.geometry!.location.lng;
 
     markersList.clear();
 
-    getNearby(Lat, Lng);
+    getNearby(lat, lng);
 
     markersList.add(Marker(
         markerId: const MarkerId("0"),
-        position: LatLng(Lat, Lng),
+        position: LatLng(lat, lng),
         infoWindow: InfoWindow(title: detail.result.name)));
 
     _polylines.clear();
     setState(() {});
-    googleMapController
-        .animateCamera(CameraUpdate.newLatLngZoom(LatLng(Lat, Lng), 14.0));
+    // googleMapController
+    //     .animateCamera(CameraUpdate.newLatLngZoom(LatLng(Lat, Lng), 14.0));
+    moveCamera(lat, lng);
   }
 
-  Future<void> _goToPlace(
+  Future<void> _goToMarker(
     double lat,
     double lng,
     Map<String, dynamic> boundsNe,
@@ -336,8 +443,14 @@ class _HomeState extends State<Home> {
         southwest: LatLng(boundsSw['lat'], boundsSw['lng']),
         northeast: LatLng(boundsNe['lat'], boundsNe['lng']),
       ),
-      25,
+      40,
     ));
+    setState(() {});
+  }
+
+  void moveCamera(double lat, double lng) {
+    googleMapController
+        .animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 14.0));
     setState(() {});
   }
 
@@ -360,17 +473,26 @@ class _HomeState extends State<Home> {
   //   return results;
   // }
 
-  void addMarkers(
-      double lat, double lng, int marker_ID, String name, int availLots) {
+  void addMarkers(double lat, double lng, int markerID, String name,
+      int availLots, String parkingType) {
     markersList.add(Marker(
-      markerId: MarkerId(marker_ID.toString()),
+      markerId: MarkerId(markerID.toString()),
       position: LatLng(lat, lng), //position of marker
       infoWindow: InfoWindow(
         title: name, //'Marker Title Second ',
-        snippet: 'Carpark Lots: ' + availLots.toString(),
+        snippet: 'Carpark Lots: $availLots',
       ),
       onTap: () {
-        // _showDirections(ctx, closest, _goToPlace, _setPolyline);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Parking Type: $parkingType"),
+          action: SnackBarAction(
+            label: 'Dismiss',
+            textColor: Color.fromARGB(255, 1, 35, 63),
+            onPressed: () {},
+          ),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.brown,
+        ));
       },
       icon: BitmapDescriptor.defaultMarkerWithHue(
           BitmapDescriptor.hueBlue), //markerbitmap
@@ -404,5 +526,66 @@ class _HomeState extends State<Home> {
     Future<void> requestPermission() async {
       await Permission.location.request();
     }
+  }
+
+  // _getCurrentLocation() {
+  //   Geolocator.getCurrentPosition(
+  //           desiredAccuracy: LocationAccuracy.best,
+  //           forceAndroidLocationManager: true)
+  //       .then((Position position) {
+  //     _currentPosition = position;
+  //   }).catchError((e) {
+  //     print(e);
+  //   });
+  // }
+
+  void _showAlert(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: const Text("Clear Everything"),
+            content: const Text(
+                'This will remove all pins and routes, are you sure?'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    setState(() {
+                      closest.clear();
+                      markersList.clear();
+                      _polylines.clear();
+                    });
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Yes',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.red,
+                    ),
+                  )),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.blue,
+                      )))
+            ],
+          );
+        });
+  }
+
+  Future<void> async1() async {
+    await Future.delayed(const Duration(milliseconds: 2000));
+    var lat = _currentPosition.latitude;
+    var lng = _currentPosition.longitude;
+    markersList.clear();
+    getNearby(lat, lng);
+    _polylines.clear();
+    setState(() {});
+    moveCamera(lat, lng);
   }
 }

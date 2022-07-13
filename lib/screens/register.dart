@@ -26,16 +26,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         backgroundColor: Colors.brown[400],
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: Colors.black,
-            size: 30,
-          ),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 30),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: isloading
-          ? Center(
+          ? const Center(
               child: CircularProgressIndicator(),
             )
           : Form(
@@ -48,17 +44,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       decoration: BoxDecoration(
                         image: DecorationImage(
                             colorFilter: ColorFilter.mode(
-                                Colors.white.withOpacity(0.8),
+                                Colors.lightBlue.withOpacity(0.8),
                                 BlendMode.modulate),
-                            image: AssetImage("assets/background1.png"),
+                            image: const AssetImage("assets/background1.png"),
                             fit: BoxFit.cover),
                       ),
                       height: double.infinity,
                       width: double.infinity,
                       //color: Colors.grey[200],
                       child: SingleChildScrollView(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 25, vertical: 300),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 25, vertical: 200),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -86,19 +82,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 filled: true,
                                 fillColor: Colors.white60,
                                 hintText: 'Enter Your Email',
-                                prefixIcon: Icon(
-                                  Icons.email,
-                                  color: Colors.black,
-                                ),
+                                prefixIcon: const Icon(Icons.email,
+                                    color: Colors.black),
                               ),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             TextFormField(
                               obscureText: true,
                               validator: (value) {
                                 if (value!.isEmpty) {
                                   return "Please enter Password";
                                 }
+                                return null;
                               },
                               onChanged: (value) {
                                 password = value;
@@ -108,12 +103,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   filled: true,
                                   fillColor: Colors.white60,
                                   hintText: 'Choose a Password',
-                                  prefixIcon: Icon(
-                                    Icons.lock,
-                                    color: Colors.black,
-                                  )),
+                                  prefixIcon: const Icon(Icons.lock,
+                                      color: Colors.black)),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             CustomButton(
                               title: 'Register',
                               onPoke: () async {
@@ -126,12 +119,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         email: email, password: password);
 
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
+                                      const SnackBar(
                                         backgroundColor: Colors.blueGrey,
                                         content: Padding(
-                                          padding: const EdgeInsets.all(8.0),
+                                          padding: EdgeInsets.all(8.0),
                                           child: Text(
-                                              'Sucessfully Register.You Can Login Now'),
+                                              'Sucessfully Register. You Can Login Now'),
                                         ),
                                         duration: Duration(seconds: 5),
                                       ),
@@ -145,15 +138,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     showDialog(
                                       context: context,
                                       builder: (ctx) => AlertDialog(
-                                        title:
-                                            Text(' Ops! Registration Failed'),
+                                        title: const Text(
+                                            ' Oops! Registration Failed'),
                                         content: Text('${e.message}'),
                                         actions: [
                                           TextButton(
                                             onPressed: () {
                                               Navigator.of(ctx).pop();
                                             },
-                                            child: Text('Okay'),
+                                            child: const Text('Okay'),
                                           )
                                         ],
                                       ),

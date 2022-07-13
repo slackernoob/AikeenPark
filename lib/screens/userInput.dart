@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class userInput extends StatefulWidget {
   @override
@@ -27,9 +28,14 @@ class _userInputState extends State<userInput> {
 
     return Scaffold(
         appBar: AppBar(
-            title: const Text(
+            title: Text(
+              style: GoogleFonts.montserrat(
+                fontSize: 30,
+                color: Colors.white,
+              ),
               "User Input",
             ),
+            backgroundColor: Colors.brown[400],
             actions: [
               IconButton(
                 onPressed: () {
@@ -66,14 +72,14 @@ class _userInputState extends State<userInput> {
                   // onChanged: (val) => amountInput = val,
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    // print(firestoreInstance);
-                    addData();
-                    locationController.clear();
-                    descriptionController.clear();
-                  },
-                  child: const Text("Submit"),
-                ),
+                    onPressed: () {
+                      // print(firestoreInstance);
+                      addData();
+                      locationController.clear();
+                      descriptionController.clear();
+                    },
+                    style: ElevatedButton.styleFrom(primary: Colors.brown),
+                    child: const Text("Submit")),
               ],
             ),
           ),

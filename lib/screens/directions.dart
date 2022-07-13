@@ -1,5 +1,6 @@
 import 'package:aikeen_park/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -11,25 +12,50 @@ class showDirections extends StatefulWidget {
   // const showDirections({Key? key}) : super(key: key);
 
   final List closest;
-  final Function go_to_place;
-  final Function set_Polyline;
-  final int polylineIdCounter;
+  final Function goToMarker;
+  final Function moveCamera;
+  final Function setPolyline;
+  final String dropdownvalue;
   final Set<Polyline> _polylines;
+  final Position currentPosition;
+  final Function getCurrentLocation;
 
-  showDirections(this.closest, this.go_to_place, this.set_Polyline,
-      this.polylineIdCounter, this._polylines);
+  showDirections(
+      this.closest,
+      this.goToMarker,
+      this.moveCamera,
+      this.setPolyline,
+      this.dropdownvalue,
+      this._polylines,
+      this.currentPosition,
+      this.getCurrentLocation);
 
   @override
   State<showDirections> createState() => _showDirectionsState();
 }
 
 class _showDirectionsState extends State<showDirections> {
-  late Position _currentPosition;
+  // late Position _currentPosition;
+
+  // Initial Selected Value
+  String dropdownvalue = 'Highest Availability';
+
+  // List of items in our dropdown menu
+  var items = [
+    'Highest Availability',
+    'Lowest Availability',
+    'Furthest',
+    'Nearest',
+  ];
+
+  late var textColor;
 
   @override
   void initState() {
-    _getCurrentLocation();
     super.initState();
+    widget.getCurrentLocation();
+    widget.closest.sort((a, b) => b[2].compareTo(a[2]));
+    // super.initState();
   }
 
   @override
@@ -37,18 +63,54 @@ class _showDirectionsState extends State<showDirections> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Card(
-          child: Text(
-            "DIRECTIONS",
-            style: TextStyle(fontSize: 15),
-          ),
-          color: Colors.grey,
-          margin: EdgeInsets.only(top: 10),
+        const SizedBox(height: 15),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Row(children: [
+              Text(
+                "DIRECTIONS",
+                // style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                style: GoogleFonts.roboto(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Icon(Icons.directions),
+            ]),
+            const SizedBox(width: 35),
+            DropdownButton(
+              value: dropdownvalue,
+              dropdownColor: Colors.white,
+              style: const TextStyle(color: Colors.black),
+              underline: Container(
+                height: 2,
+                color: Colors.brown,
+              ),
+              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
+              items: items.map((String items) {
+                return DropdownMenuItem(
+                  value: items,
+                  child: Text(
+                    items,
+                    // style: const TextStyle(color: Colors.white),
+                  ),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  dropdownvalue = newValue!;
+                  sortClosest(dropdownvalue);
+                });
+              },
+              onTap: () {},
+            ),
+          ],
         ),
-        Container(
-          height: MediaQuery.of(context).size.height * 0.25,
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.2,
           child: ListView(
-            padding: EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.only(top: 2),
             children: createDirections(),
           ),
         ),
@@ -58,7 +120,11 @@ class _showDirectionsState extends State<showDirections> {
 
   List<Widget> createDirections() {
     List<Widget> directionCards = [];
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < int.parse(widget.dropdownvalue); i++) {
+      textColor = Colors.black;
+      if (widget.closest[i][2] == 0) {
+        textColor = Colors.red;
+      }
       directionCards.add(directionCard(i));
     }
     return directionCards;
@@ -66,52 +132,77 @@ class _showDirectionsState extends State<showDirections> {
 
   Widget directionCard(int i) {
     return Container(
-      margin: EdgeInsets.all(10),
-      height: 100,
+      margin: const EdgeInsets.all(10),
+      height: 112,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Divider(
-            color: Colors.red,
+          const Divider(
+            color: Color.fromARGB(255, 192, 78, 37),
             thickness: 1,
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
+              IconButton(
+                onPressed: () {
+                  widget.moveCamera(widget.closest[i][0], widget.closest[i][1]);
+                },
+                icon: const Icon(Icons.gps_fixed),
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: Text(widget.closest[i][3]),
+                  child: Text(
+                    widget.closest[i][3],
+                  ),
                 ),
               ),
-              RaisedButton(
-                  color: Colors.white,
-                  child: Text("Select route"),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.brown[400],
+                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0)),
+                  ),
                   onPressed: () async {
                     widget._polylines.clear();
-                    _getCurrentLocation();
+                    // _getCurrentLocation();
                     // locatePosition();
                     var directions = await getDirections(
-                      _currentPosition,
+                      widget.currentPosition,
                       // _currentPosition.latitude.toString(),
                       // _currentPosition.longitude.toString(),
                       widget.closest[i][0].toString(),
                       widget.closest[i][1].toString(),
                     );
-                    widget.set_Polyline(directions['polyline_decoded']);
-                    widget.go_to_place(
+                    widget.setPolyline(directions['polyline_decoded']);
+                    widget.goToMarker(
                       directions['start_location']['lat'],
                       directions['start_location']['lng'],
                       directions['bounds_ne'],
                       directions['bounds_sw'],
                     );
                   },
-                  shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(30.0)))
+                  child: const Text("Select route")),
             ],
           ),
-          Text("Carpark Lots: " + widget.closest[i][2].toString()),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.favorite_border),
+              ),
+              const Text("Carpark Lots: "),
+              Text(
+                widget.closest[i][2].toString(),
+                textAlign: TextAlign.end,
+                style: TextStyle(color: textColor),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -120,16 +211,7 @@ class _showDirectionsState extends State<showDirections> {
   Future<Map<String, dynamic>> getDirections(
       Position currPosition, String destLat, String destLng) async {
     final String url =
-        'https://maps.googleapis.com/maps/api/directions/json?origin=' +
-            currPosition.latitude.toString() +
-            ',' +
-            currPosition.longitude.toString() +
-            '&destination=' +
-            destLat +
-            ',' +
-            destLng +
-            '&key=' +
-            kGoogleApiKey;
+        'https://maps.googleapis.com/maps/api/directions/json?origin=${currPosition.latitude},${currPosition.longitude}&destination=$destLat,$destLng&key=$kGoogleApiKey';
     var response = await http.get(Uri.parse(url));
     var json = jsonDecode(response.body);
 
@@ -145,15 +227,30 @@ class _showDirectionsState extends State<showDirections> {
     return results;
   }
 
-  _getCurrentLocation() {
-    Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.best,
-            forceAndroidLocationManager: true)
-        .then((Position position) {
-      _currentPosition = position;
-    }).catchError((e) {
-      print(e);
-    });
+  // _getCurrentLocation() {
+  //   Geolocator.getCurrentPosition(
+  //           desiredAccuracy: LocationAccuracy.best,
+  //           forceAndroidLocationManager: true)
+  //       .then((Position position) {
+  //     _currentPosition = position;
+  //   }).catchError((e) {
+  //     print(e);
+  //   });
+  // }
+
+  void sortClosest(String dropdownvalue) {
+    if (dropdownvalue == items[0]) {
+      widget.closest.sort((a, b) => b[2].compareTo(a[2]));
+    }
+    if (dropdownvalue == items[1]) {
+      widget.closest.sort((a, b) => a[2].compareTo(b[2]));
+    }
+    if (dropdownvalue == items[2]) {
+      widget.closest.sort((a, b) => b[5].compareTo(a[5]));
+    }
+    if (dropdownvalue == items[3]) {
+      widget.closest.sort((a, b) => a[5].compareTo(b[5]));
+    }
   }
 
   // Future<Position> locatePosition() async {
