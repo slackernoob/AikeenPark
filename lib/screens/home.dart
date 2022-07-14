@@ -74,15 +74,31 @@ _getCurrentLocation() {
   });
 }
 
-void _showDirections(BuildContext ctx, List closest, Function goToMarker,
-    Function moveCamera, String dropdownvalue, Function setPolyline) {
+void _showDirections(
+    BuildContext ctx,
+    List closest,
+    Function goToMarker,
+    Function moveCamera,
+    String dropdownvalue,
+    Function setPolyline,
+    List favCarparks,
+    bool isSaved) {
   showModalBottomSheet(
       context: ctx,
       builder: (_) {
         return SizedBox(
           height: MediaQuery.of(ctx).size.height * 0.3,
-          child: showDirections(closest, goToMarker, moveCamera, setPolyline,
-              dropdownvalue, _polylines, _currentPosition, _getCurrentLocation),
+          child: showDirections(
+              closest,
+              goToMarker,
+              moveCamera,
+              setPolyline,
+              dropdownvalue,
+              _polylines,
+              _currentPosition,
+              _getCurrentLocation,
+              favCarparks,
+              isSaved),
         );
       });
 }
@@ -105,6 +121,7 @@ class _HomeState extends State<Home> {
   List nearbyCarparks = [];
   List availabilityInfo = [];
   List closest = [];
+  List favCarparks = [];
 
   List urmum = [];
 
@@ -191,6 +208,7 @@ class _HomeState extends State<Home> {
 
   bool switchValue = false;
   bool isVisible = true;
+  bool isSaved = true;
 
   // Initial Selected Value
   String dropdownvalue = '5';
@@ -350,6 +368,8 @@ class _HomeState extends State<Home> {
                   moveCamera,
                   dropdownvalue,
                   _setPolyline,
+                  favCarparks,
+                  isSaved,
                 );
               }),
           SpeedDialChild(
@@ -364,14 +384,16 @@ class _HomeState extends State<Home> {
               // setState(() {});
               ),
           SpeedDialChild(
-              child: const Icon(Icons.bookmarks, color: Colors.brown),
-              label: 'Bookmarks',
+              child: const Icon(Icons.favorite, color: Colors.brown),
+              label: 'Favorites',
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => const MyFavorites(),
+                    builder: (BuildContext context) =>
+                        MyFavorites(favCarparks, closest),
                   ),
                 );
+                // pushToFavoriteRoute(context);
               }),
         ],
       ),
@@ -555,6 +577,7 @@ class _HomeState extends State<Home> {
                       closest.clear();
                       markersList.clear();
                       _polylines.clear();
+                      favCarparks.clear();
                     });
                     Navigator.of(context).pop();
                   },
@@ -589,4 +612,12 @@ class _HomeState extends State<Home> {
     setState(() {});
     moveCamera(lat, lng);
   }
+
+  // Future pushToFavoriteRoute(BuildContext context) {
+  //   return Navigator.of(context).push(
+  //     MaterialPageRoute(
+  //       builder: (BuildContext context) => MyFavorites(favCarparks, closest),
+  //     ),
+  //   );
+  // }
 }

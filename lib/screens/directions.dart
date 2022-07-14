@@ -19,6 +19,8 @@ class showDirections extends StatefulWidget {
   final Set<Polyline> _polylines;
   final Position currentPosition;
   final Function getCurrentLocation;
+  final List favCarparks;
+  bool isSaved;
 
   showDirections(
       this.closest,
@@ -28,7 +30,9 @@ class showDirections extends StatefulWidget {
       this.dropdownvalue,
       this._polylines,
       this.currentPosition,
-      this.getCurrentLocation);
+      this.getCurrentLocation,
+      this.favCarparks,
+      this.isSaved);
 
   @override
   State<showDirections> createState() => _showDirectionsState();
@@ -48,7 +52,7 @@ class _showDirectionsState extends State<showDirections> {
     'Nearest',
   ];
 
-  late var textColor;
+  var textColor = Colors.black;
 
   @override
   void initState() {
@@ -192,8 +196,30 @@ class _showDirectionsState extends State<showDirections> {
           Row(
             children: [
               IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.favorite_border),
+                onPressed: () {
+                  widget.isSaved =
+                      widget.favCarparks.contains(widget.closest[i]);
+                  // setState(() {
+                  if (widget.isSaved) {
+                    widget.favCarparks.remove(widget.closest[i]);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("Remove from favorites"),
+                    ));
+                  } else {
+                    widget.favCarparks.add(widget.closest[i]);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("Added to favorites"),
+                    ));
+                  }
+                  // });
+
+                  print(widget.isSaved);
+                  print(widget.favCarparks);
+                },
+                icon: Icon(Icons.favorite_border
+                    // widget.isSaved ? Icons.favorite : Icons.favorite_border,
+                    // color: widget.isSaved ? Colors.red : null,
+                    ),
               ),
               const Text("Carpark Lots: "),
               Text(

@@ -26,63 +26,88 @@ class _userInputState extends State<userInput> {
           print("Added Data with ID: ${documentSnapshot.id}"));
     }
 
-    return Scaffold(
-        appBar: AppBar(
-            title: Text(
-              style: GoogleFonts.montserrat(
-                fontSize: 30,
-                color: Colors.white,
-              ),
-              "User Input",
-            ),
-            backgroundColor: Colors.brown[400],
-            actions: [
-              IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.arrow_back),
-              ),
-            ]),
-        body: Card(
-          //elevation: 5,
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                TextField(
-                  decoration: const InputDecoration(
-                      labelText: 'Location/Street Name',
-                      hintText: 'eg. Toa Payoh Lorong 8 / Yishun Avenue 6'),
-                  controller: locationController,
-                  // onSubmitted: (_) => submitData(),
+    // final CollectionReference collectionRef =
+    //     FirebaseFirestore.instance.collection("userinput");
 
-                  // onChanged: (val) {
-                  //   titleInput = val;
-                  // },
-                ),
-                TextField(
-                  decoration: const InputDecoration(
-                      labelText: 'Description',
-                      hintText:
-                          'eg. Underground carpark / Multi-Story Carpark'),
-                  controller: descriptionController,
-                  // onSubmitted: (_) => submitData(),
-                  // onChanged: (val) => amountInput = val,
-                ),
-                ElevatedButton(
-                    onPressed: () {
-                      // print(firestoreInstance);
-                      addData();
-                      locationController.clear();
-                      descriptionController.clear();
-                    },
-                    style: ElevatedButton.styleFrom(primary: Colors.brown),
-                    child: const Text("Submit")),
-              ],
+    // List dataList = [];
+
+    // Future getData() async {
+    //   try {
+    //     await collectionRef.get().then((querySnapshot) {
+    //       for (var result in querySnapshot.docs) {
+    //         dataList.add(result.data());
+    //       }
+    //       print(dataList[0]['description']);
+    //     });
+    //   } catch (e) {
+    //     debugPrint("Error - $e");
+    //     return e;
+    //   }
+    // }
+
+    return Scaffold(
+      appBar: AppBar(
+          title: Text(
+            style: GoogleFonts.montserrat(
+              fontSize: 30,
+              color: Colors.white,
             ),
+            "User Input",
           ),
-        ));
+          backgroundColor: Colors.brown[400],
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(Icons.arrow_back),
+            ),
+            IconButton(
+              onPressed: () {
+                // getData();
+              },
+              icon: const Icon(Icons.data_array),
+            ),
+          ]),
+      body: Card(
+        //elevation: 5,
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              TextField(
+                decoration: const InputDecoration(
+                    labelText: 'Location/Street Name',
+                    hintText: 'eg. Toa Payoh Lorong 8 / Yishun Avenue 6'),
+                controller: locationController,
+                // onSubmitted: (_) => submitData(),
+
+                // onChanged: (val) {
+                //   titleInput = val;
+                // },
+              ),
+              TextField(
+                decoration: const InputDecoration(
+                    labelText: 'Description',
+                    hintText: 'eg. Underground carpark / Multi-Story Carpark'),
+                controller: descriptionController,
+                // onSubmitted: (_) => submitData(),
+                // onChanged: (val) => amountInput = val,
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    // print(firestoreInstance);
+                    addData();
+                    locationController.clear();
+                    descriptionController.clear();
+                  },
+                  style: ElevatedButton.styleFrom(primary: Colors.brown),
+                  child: const Text("Submit")),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

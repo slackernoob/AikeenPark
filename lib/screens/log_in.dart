@@ -215,4 +215,5 @@ class _LogInState extends State<LogIn> {
 //   Future<void> _signOut() async {
 //     await FirebaseAuth.instance.signOut();
 //   }
+
 }
