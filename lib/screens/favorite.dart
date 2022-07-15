@@ -5,9 +5,9 @@ class MyFavorites extends StatefulWidget {
   // const MyFavorites({Key? key}) : super(key: key);
 
   final List favCarparks;
-  final List closest;
+  // final List closest;
 
-  MyFavorites(this.favCarparks, this.closest);
+  MyFavorites(this.favCarparks); //, this.closest);
 
   @override
   State<MyFavorites> createState() => _MyFavoritesState();
@@ -32,24 +32,32 @@ class _MyFavoritesState extends State<MyFavorites> {
               print("___");
               print(widget.favCarparks.length);
               print("________");
-              print(widget.closest);
+              // print(widget.closest);
             },
             icon: const Icon(Icons.check),
+          ),
+          IconButton(
+            onPressed: () {
+              setState(() {
+                widget.favCarparks.clear();
+              });
+            },
+            icon: const Icon(Icons.clear),
           ),
         ],
         backgroundColor: Colors.brown[400],
       ),
       body: ListView.separated(
-          itemCount: widget.closest.length,
+          itemCount: widget.favCarparks.length,
           separatorBuilder: (BuildContext context, int index) =>
               const Divider(),
           itemBuilder: (BuildContext context, int index) {
-            List savedFavs = widget.closest[index];
+            List savedFavs = widget.favCarparks[index];
             bool isSaved = widget.favCarparks.contains(savedFavs);
 
             return ListTile(
-              title: Text(widget.closest[index][3]),
-              subtitle: Text("Carpark Lots: ${widget.closest[index][2]}"),
+              title: Text(widget.favCarparks[index][3]),
+              subtitle: Text("Carpark Lots: ${widget.favCarparks[index][2]}"),
               leading: CircleAvatar(
                   backgroundImage: NetworkImage(
                       "https://images.unsplash.com/photo-1547721064-da6cfb341d50")),
@@ -71,8 +79,3 @@ class _MyFavoritesState extends State<MyFavorites> {
     );
   }
 }
-
-
-//right now only can clear from below
-//trying to implement ontap change icon only 
-//mayb everytime clcik from list showtoast 'added' / 'remove

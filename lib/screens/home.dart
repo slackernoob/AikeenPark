@@ -390,7 +390,7 @@ class _HomeState extends State<Home> {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (BuildContext context) =>
-                        MyFavorites(favCarparks, closest),
+                        MyFavorites(favCarparks), //, closest),
                   ),
                 );
                 // pushToFavoriteRoute(context);
@@ -509,7 +509,7 @@ class _HomeState extends State<Home> {
           content: Text("Parking Type: $parkingType"),
           action: SnackBarAction(
             label: 'Dismiss',
-            textColor: Color.fromARGB(255, 1, 35, 63),
+            textColor: const Color.fromARGB(255, 1, 35, 63),
             onPressed: () {},
           ),
           behavior: SnackBarBehavior.floating,
@@ -539,8 +539,8 @@ class _HomeState extends State<Home> {
   }
 
   void request() async {
-    bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
-
+    // bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+    //removed above bool from error
     await Geolocator.checkPermission();
     await Geolocator.requestPermission();
 

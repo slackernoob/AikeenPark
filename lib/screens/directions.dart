@@ -113,30 +113,42 @@ class _showDirectionsState extends State<showDirections> {
         ),
         SizedBox(
           height: MediaQuery.of(context).size.height * 0.2,
-          child: ListView(
-            padding: const EdgeInsets.only(top: 2),
-            children: createDirections(),
+          child: ListView.separated(
+            // padding: const EdgeInsets.only(top: 2),
+            itemCount: widget.closest.length,
+            separatorBuilder: (BuildContext context, int index) =>
+                const Divider(),
+            itemBuilder: (BuildContext context, int index) {
+              List savedFavs = widget.closest[index];
+              bool isSaved = widget.favCarparks.contains(savedFavs);
+
+              return directionCard(index, isSaved, savedFavs);
+            },
           ),
+          //     ListView(
+          //   padding: const EdgeInsets.only(top: 2),
+          //   children: createDirections(),
+          // ),
         ),
       ],
     );
   }
 
-  List<Widget> createDirections() {
-    List<Widget> directionCards = [];
-    for (int i = 0; i < int.parse(widget.dropdownvalue); i++) {
-      textColor = Colors.black;
-      if (widget.closest[i][2] == 0) {
-        textColor = Colors.red;
-      }
-      directionCards.add(directionCard(i));
-    }
-    return directionCards;
-  }
+  // List<Widget> createDirections() {
+  //   List<Widget> directionCards = [];
+  //   for (int i = 0; i < int.parse(widget.dropdownvalue); i++) {
+  //     textColor = Colors.black;
+  //     if (widget.closest[i][2] == 0) {
+  //       textColor = Colors.red;
+  //     }
+  //     directionCards.add(directionCard(i));
+  //   }
+  //   return directionCards;
+  // }
 
-  Widget directionCard(int i) {
+  Widget directionCard(int i, bool isSaved, List savedFavs) {
     return Container(
-      margin: const EdgeInsets.all(10),
+      margin: const EdgeInsets.only(left: 10, right: 10),
       height: 112,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -197,29 +209,36 @@ class _showDirectionsState extends State<showDirections> {
             children: [
               IconButton(
                 onPressed: () {
-                  widget.isSaved =
-                      widget.favCarparks.contains(widget.closest[i]);
-                  // setState(() {
-                  if (widget.isSaved) {
-                    widget.favCarparks.remove(widget.closest[i]);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Remove from favorites"),
-                    ));
-                  } else {
-                    widget.favCarparks.add(widget.closest[i]);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Added to favorites"),
-                    ));
-                  }
-                  // });
+                  setState(() {
+                    if (isSaved) {
+                      widget.favCarparks.remove(savedFavs);
+                    } else {
+                      widget.favCarparks.add(savedFavs);
+                    }
+                  });
+                  // widget.isSaved =
+                  //     widget.favCarparks.contains(widget.closest[i]);
+                  // // setState(() {
+                  // if (widget.isSaved) {
+                  //   widget.favCarparks.remove(widget.closest[i]);
+                  //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  //     content: Text("Remove from favorites"),
+                  //   ));
+                  // } else {
+                  //   widget.favCarparks.add(widget.closest[i]);
+                  //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  //     content: Text("Added to favorites"),
+                  //   ));
+                  // }
+                  // // });
 
-                  print(widget.isSaved);
-                  print(widget.favCarparks);
+                  // print(widget.isSaved);
+                  // print(widget.favCarparks);
                 },
-                icon: Icon(Icons.favorite_border
-                    // widget.isSaved ? Icons.favorite : Icons.favorite_border,
-                    // color: widget.isSaved ? Colors.red : null,
-                    ),
+                icon: Icon(
+                  isSaved ? Icons.favorite : Icons.favorite_border,
+                  color: isSaved ? Colors.red : null,
+                ),
               ),
               const Text("Carpark Lots: "),
               Text(
@@ -264,6 +283,7 @@ class _showDirectionsState extends State<showDirections> {
   //   });
   // }
 
+  //sort accordingly: furthest is furthest from location user selected
   void sortClosest(String dropdownvalue) {
     if (dropdownvalue == items[0]) {
       widget.closest.sort((a, b) => b[2].compareTo(a[2]));
