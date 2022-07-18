@@ -1,5 +1,7 @@
 import 'package:aikeen_park/constants.dart';
+import 'package:aikeen_park/functions/homefunctions.dart';
 import 'package:aikeen_park/screens/favorite.dart';
+import 'package:aikeen_park/screens/optionlist.dart';
 import 'package:aikeen_park/screens/userInput.dart';
 import 'package:aikeen_park/screens/directions.dart';
 import 'package:flutter/material.dart';
@@ -17,10 +19,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
-
 import 'package:permission_handler/permission_handler.dart';
-
-// import './search.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -74,15 +73,8 @@ _getCurrentLocation() {
   });
 }
 
-void _showDirections(
-    BuildContext ctx,
-    List closest,
-    Function goToMarker,
-    Function moveCamera,
-    String dropdownvalue,
-    Function setPolyline,
-    List favCarparks,
-    bool isSaved) {
+void _showDirections(BuildContext ctx, List closest, Function goToMarker,
+    Function moveCamera, Function setPolyline, List favCarparks, bool isSaved) {
   showModalBottomSheet(
       context: ctx,
       builder: (_) {
@@ -93,7 +85,6 @@ void _showDirections(
               goToMarker,
               moveCamera,
               setPolyline,
-              dropdownvalue,
               _polylines,
               _currentPosition,
               _getCurrentLocation,
@@ -123,7 +114,8 @@ class _HomeState extends State<Home> {
   List closest = [];
   List favCarparks = [];
 
-  List urmum = [];
+  List closestC = [];
+  List closestM = [];
 
   var intCounter = 0;
 
@@ -142,9 +134,79 @@ class _HomeState extends State<Home> {
     availabilityInfo.sort((a, b) => a[5].compareTo(b[5]));
 
     closest.clear();
-    for (int i = 0; i < int.parse(dropdownvalue); i++) {
-      closest.add(availabilityInfo[i]);
+
+    //for debug purposes
+
+    // int counterC = 0;
+    // int counterH = 0;
+    // int counterY = 0;
+    // for (int i = 0; i < availabilityInfo.length; i += 1) {
+    //   if (availabilityInfo[i][4] == 'C') {
+    //     counterC += 1;
+    //   }
+    //   if (availabilityInfo[i][4] == 'H') {
+    //     print(availabilityInfo[i]);
+    //     counterH += 1;
+    //   }
+    //   if (availabilityInfo[i][4] == 'Y') {
+    //     print(availabilityInfo[i]);
+
+    //     counterY += 1;
+    //   }
+    // }
+    // print("CounterC: ");
+    // print(counterC);
+    // print("CounterH: ");
+    // print(counterH);
+    // print("CounterY: ");
+    // print(counterY);
+
+    // for (int i = 0; i < int.parse(dropdownvalue); i++) {
+    //   if (carparkType == 'Cars' && availabilityInfo[i][4] == 'C') {
+    //     // print(availabilityInfo[i]);
+    //     closest.add(availabilityInfo[i]);
+    //   }
+    //   if (carparkType == 'Motorcycle' && availabilityInfo[i][4] == 'M') {
+    //     // print(availabilityInfo[i]);
+
+    //     closest.add(availabilityInfo[i]);
+    //   }
+    //   if (carparkType == 'Y' && availabilityInfo[i][4] == 'Y') {
+    //     // print(availabilityInfo[i]);
+
+    //     closest.add(availabilityInfo[i]);
+    //   }
+    // }
+    int totalCount = 0;
+    int numCarpark = 0;
+
+    //functions folder
+    numCarpark = choosingNumCarparks(numCarparksValue);
+
+    for (int i = 0; i < availabilityInfo.length; i++) {
+      if (carparkTypeValue == 1 &&
+          availabilityInfo[i][4] == 'C' &&
+          totalCount < numCarpark) {
+        closest.add(availabilityInfo[i]);
+        totalCount++;
+      }
+      if (carparkTypeValue == 2 &&
+          availabilityInfo[i][4] == 'H' &&
+          totalCount < numCarpark) {
+        closest.add(availabilityInfo[i]);
+        totalCount++;
+      }
+      if (carparkTypeValue == 3 &&
+          availabilityInfo[i][4] == 'Y' &&
+          totalCount < numCarpark) {
+        closest.add(availabilityInfo[i]);
+        totalCount++;
+      }
     }
+
+    // for (int i = 0; i < int.parse(dropdownvalue); i++) {
+    //   closest.add(availabilityInfo[i]);
+    // }
 
     double nearbyLat;
     double nearbyLng;
@@ -211,7 +273,8 @@ class _HomeState extends State<Home> {
   bool isSaved = true;
 
   // Initial Selected Value
-  String dropdownvalue = '5';
+  // String dropdownvalue = '5';
+  // String carparkType = 'Cars';
 
   // List of items in our dropdown menu
   var items = [
@@ -220,6 +283,15 @@ class _HomeState extends State<Home> {
     '15',
     '20',
   ];
+
+  var carparkItems = [
+    'Cars',
+    'Heavy Vehicles',
+    'Motorcycles',
+  ];
+
+  int carparkTypeValue = 1;
+  int numCarparksValue = 1;
 
   // late Position _currentPosition;
 
@@ -262,27 +334,49 @@ class _HomeState extends State<Home> {
           //     setState(() {});
           //   },
           // ),
-          DropdownButton(
-            value: dropdownvalue,
-            dropdownColor: Colors.brown,
-            style: const TextStyle(color: Colors.white),
-            icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
-            items: items.map((String items) {
-              return DropdownMenuItem(
-                value: items,
-                child: Text(
-                  items,
-                  // style: const TextStyle(color: Colors.white),
-                ),
-              );
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                dropdownvalue = newValue!;
-              });
-            },
-            onTap: () {},
-          ),
+
+          // DropdownButton(
+          //   value: carparkType,
+          //   dropdownColor: Colors.brown,
+          //   style: const TextStyle(color: Colors.white),
+          //   icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+          //   items: carparkItems.map((String carparkItems) {
+          //     return DropdownMenuItem(
+          //       value: carparkItems,
+          //       child: Text(
+          //         carparkItems,
+          //         // style: const TextStyle(color: Colors.white),
+          //       ),
+          //     );
+          //   }).toList(),
+          //   onChanged: (String? newValue) {
+          //     setState(() {
+          //       carparkType = newValue!;
+          //     });
+          //   },
+          //   onTap: () {},
+          // ),
+          // DropdownButton(
+          //   value: dropdownvalue,
+          //   dropdownColor: Colors.brown,
+          //   style: const TextStyle(color: Colors.white),
+          //   icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+          //   items: items.map((String items) {
+          //     return DropdownMenuItem(
+          //       value: items,
+          //       child: Text(
+          //         items,
+          //         // style: const TextStyle(color: Colors.white),
+          //       ),
+          //     );
+          //   }).toList(),
+          //   onChanged: (String? newValue) {
+          //     setState(() {
+          //       dropdownvalue = newValue!;
+          //     });
+          //   },
+          //   onTap: () {},
+          // ),
           IconButton(
             onPressed: () {
               getDataMall();
@@ -325,76 +419,130 @@ class _HomeState extends State<Home> {
             EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.1),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: SpeedDial(
-        animatedIcon: AnimatedIcons.menu_close,
-        backgroundColor: Colors.brown[400],
-        overlayColor: Colors.brown[50],
-        overlayOpacity: 0.4,
-        spacing: 8,
-        spaceBetweenChildren: 8,
-        children: [
-          SpeedDialChild(
-              child: const Icon(Icons.my_location, color: Colors.brown),
-              label: 'Search around User',
-              onTap: () {
-                getDataMall();
-                async1();
-                // print(closest);
-                // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                //   content: Text("Sending Message"),
-                // ));
-              }),
-          SpeedDialChild(
-              child: const Icon(Icons.feedback, color: Colors.brown),
-              label: 'User Feedback',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => userInput(),
-                  ),
-                );
-              }),
-          SpeedDialChild(
-              child: const Icon(Icons.list_alt, color: Colors.brown),
-              label: 'Carpark List',
-              onTap: () {
-                if (closest[0][0] == null) {
-                  return;
-                }
-                _showDirections(
-                  context,
-                  closest,
-                  _goToMarker,
-                  moveCamera,
-                  dropdownvalue,
-                  _setPolyline,
-                  favCarparks,
-                  isSaved,
-                );
-              }),
-          SpeedDialChild(
-              child: const Icon(Icons.clear, color: Colors.brown),
-              label: 'Clear All',
-              onTap: () {
-                _showAlert(context);
-              }
-              // closest.clear();
-              // markersList.clear();
-              // _polylines.clear();
-              // setState(() {});
+      floatingActionButton: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.start,
+        direction: Axis.horizontal,
+        children: <Widget>[
+          Container(
+            margin: const EdgeInsets.all(10),
+            child: SizedBox(
+              height: 40,
+              width: 140,
+              child: FloatingActionButton(
+                // shape: const BeveledRectangleBorder(
+                //     borderRadius: BorderRadius.all(Radius.circular(30.0))),
+                backgroundColor: Colors.brown[400],
+                splashColor: Colors.red,
+                onPressed: () {
+                  _showTips(context);
+                },
+                child: const Text("Quick Start"),
               ),
-          SpeedDialChild(
-              child: const Icon(Icons.favorite, color: Colors.brown),
-              label: 'Favorites',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        MyFavorites(favCarparks), //, closest),
+            ),
+          ),
+          const SizedBox(width: 175),
+          SpeedDial(
+            animatedIcon: AnimatedIcons.menu_close,
+            backgroundColor: Colors.brown[400],
+            overlayColor: Colors.brown[50],
+            overlayOpacity: 0.4,
+            spacing: 8,
+            spaceBetweenChildren: 8,
+            children: [
+              SpeedDialChild(
+                  child: const Icon(Icons.my_location, color: Colors.brown),
+                  label: 'Search around User',
+                  onTap: () {
+                    getDataMall();
+                    async1();
+                    // print(closest);
+                    // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    //   content: Text("Sending Message"),
+                    // ));
+                  }),
+              SpeedDialChild(
+                  child: const Icon(Icons.feedback, color: Colors.brown),
+                  label: 'User Feedback',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => userInput(),
+                      ),
+                    );
+                  }),
+              SpeedDialChild(
+                  child: const Icon(Icons.list_alt, color: Colors.brown),
+                  label: 'Carpark List',
+                  onTap: () {
+                    if (closest[0][0] == null) {
+                      return;
+                    }
+                    _showDirections(
+                      context,
+                      closest,
+                      _goToMarker,
+                      moveCamera,
+                      _setPolyline,
+                      favCarparks,
+                      isSaved,
+                    );
+                  }),
+              SpeedDialChild(
+                  child: const Icon(Icons.clear, color: Colors.brown),
+                  label: 'Clear All',
+                  onTap: () {
+                    _showAlert(context);
+                  }
+                  // closest.clear();
+                  // markersList.clear();
+                  // _polylines.clear();
+                  // setState(() {});
                   ),
-                );
-                // pushToFavoriteRoute(context);
-              }),
+              SpeedDialChild(
+                  child: const Icon(Icons.favorite, color: Colors.brown),
+                  label: 'Favorites',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            MyFavorites(favCarparks), //, closest),
+                      ),
+                    );
+                    // pushToFavoriteRoute(context);
+                  }),
+              SpeedDialChild(
+                  child: const Icon(Icons.camera, color: Colors.brown),
+                  label: 'Camera',
+                  onTap: () async {
+                    _showTips(context);
+                    // await availableCameras().then((value) {
+                    //   Navigator.of(context).push(MaterialPageRoute(
+                    //       builder: (BuildContext context) =>
+                    //           CameraPage(cameras: value)));
+                    // });
+
+                    // await availableCameras().then((value) => Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (_) => CameraPage(cameras: value))));
+                  }),
+              SpeedDialChild(
+                  child: const Icon(Icons.filter_list, color: Colors.brown),
+                  label: 'Options',
+                  onTap: () async {
+                    final results = await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            OptionPage(carparkTypeValue, numCarparksValue),
+                      ),
+                    );
+                    carparkTypeValue = results[0];
+                    numCarparksValue = results[1];
+                    print(carparkTypeValue);
+                    print(numCarparksValue);
+                  }),
+            ],
+          ),
         ],
       ),
     );
@@ -551,17 +699,6 @@ class _HomeState extends State<Home> {
     }
   }
 
-  // _getCurrentLocation() {
-  //   Geolocator.getCurrentPosition(
-  //           desiredAccuracy: LocationAccuracy.best,
-  //           forceAndroidLocationManager: true)
-  //       .then((Position position) {
-  //     _currentPosition = position;
-  //   }).catchError((e) {
-  //     print(e);
-  //   });
-  // }
-
   void _showAlert(BuildContext context) {
     showDialog(
         context: context,
@@ -620,4 +757,28 @@ class _HomeState extends State<Home> {
   //     ),
   //   );
   // }
+
+  void _showTips(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: const Text(
+                "Choose carpark type & carpark number under options"),
+            content: const Text(
+                'Then, either search using top right search icon or search around users'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Roger',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.red,
+                      )))
+            ],
+          );
+        });
+  }
 }

@@ -1,6 +1,11 @@
+import 'dart:io';
+
+import 'package:aikeen_park/screens/camera.dart';
+import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+// import 'dart:io' as io;
 
 class userInput extends StatefulWidget {
   @override
@@ -75,7 +80,7 @@ class _userInputState extends State<userInput> {
           padding: const EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
+            children: [
               TextField(
                 decoration: const InputDecoration(
                     labelText: 'Location/Street Name',
@@ -94,6 +99,50 @@ class _userInputState extends State<userInput> {
                 controller: descriptionController,
                 // onSubmitted: (_) => submitData(),
                 // onChanged: (val) => amountInput = val,
+              ),
+              const SizedBox(height: 20),
+              Center(
+                // alignment: Alignment.center,
+                child: GestureDetector(
+                  onTap: () async {
+                    await availableCameras().then((value) {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              CameraPage(cameras: value)));
+                    });
+                    // await availableCameras().then((value) => Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (_) => CameraPage(cameras: value))));
+                  },
+                  child: CircleAvatar(
+                    radius: 55,
+                    backgroundColor: Color(0xffFDCF09),
+                    child:
+                        // _photo != null
+                        //     ? ClipRRect(
+                        //         borderRadius: BorderRadius.circular(50),
+                        //         child: Image.file(
+                        //           _photo!,
+                        //           width: 100,
+                        //           height: 100,
+                        //           fit: BoxFit.fitHeight,
+                        //         ),
+                        //       )
+                        //     :
+                        Container(
+                      decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(50)),
+                      width: 100,
+                      height: 100,
+                      child: Icon(
+                        Icons.add_a_photo_sharp,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                  ),
+                ),
               ),
               ElevatedButton(
                   onPressed: () {

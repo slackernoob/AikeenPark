@@ -15,7 +15,6 @@ class showDirections extends StatefulWidget {
   final Function goToMarker;
   final Function moveCamera;
   final Function setPolyline;
-  final String dropdownvalue;
   final Set<Polyline> _polylines;
   final Position currentPosition;
   final Function getCurrentLocation;
@@ -27,7 +26,6 @@ class showDirections extends StatefulWidget {
       this.goToMarker,
       this.moveCamera,
       this.setPolyline,
-      this.dropdownvalue,
       this._polylines,
       this.currentPosition,
       this.getCurrentLocation,
