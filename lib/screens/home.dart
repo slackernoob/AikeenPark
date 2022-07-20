@@ -1,5 +1,6 @@
 import 'package:aikeen_park/constants.dart';
 import 'package:aikeen_park/functions/homefunctions.dart';
+import 'package:aikeen_park/screens/dev.dart';
 import 'package:aikeen_park/screens/favorite.dart';
 import 'package:aikeen_park/screens/optionlist.dart';
 import 'package:aikeen_park/screens/userInput.dart';
@@ -277,18 +278,18 @@ class _HomeState extends State<Home> {
   // String carparkType = 'Cars';
 
   // List of items in our dropdown menu
-  var items = [
-    '5',
-    '10',
-    '15',
-    '20',
-  ];
+  // var items = [
+  //   '5',
+  //   '10',
+  //   '15',
+  //   '20',
+  // ];
 
-  var carparkItems = [
-    'Cars',
-    'Heavy Vehicles',
-    'Motorcycles',
-  ];
+  // var carparkItems = [
+  //   'Cars',
+  //   'Heavy Vehicles',
+  //   'Motorcycles',
+  // ];
 
   int carparkTypeValue = 1;
   int numCarparksValue = 1;
@@ -420,7 +421,7 @@ class _HomeState extends State<Home> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: Wrap(
-        crossAxisAlignment: WrapCrossAlignment.start,
+        crossAxisAlignment: WrapCrossAlignment.center,
         direction: Axis.horizontal,
         children: <Widget>[
           Container(
@@ -429,8 +430,8 @@ class _HomeState extends State<Home> {
               height: 40,
               width: 140,
               child: FloatingActionButton(
-                // shape: const BeveledRectangleBorder(
-                //     borderRadius: BorderRadius.all(Radius.circular(30.0))),
+                shape: BeveledRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0)),
                 backgroundColor: Colors.brown[400],
                 splashColor: Colors.red,
                 onPressed: () {
@@ -440,7 +441,7 @@ class _HomeState extends State<Home> {
               ),
             ),
           ),
-          const SizedBox(width: 175),
+          const SizedBox(width: 30),
           SpeedDial(
             animatedIcon: AnimatedIcons.menu_close,
             backgroundColor: Colors.brown[400],
@@ -501,30 +502,22 @@ class _HomeState extends State<Home> {
               SpeedDialChild(
                   child: const Icon(Icons.favorite, color: Colors.brown),
                   label: 'Favorites',
-                  onTap: () {
-                    Navigator.of(context).push(
+                  onTap: () async {
+                    final results = await Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (BuildContext context) =>
-                            MyFavorites(favCarparks), //, closest),
+                            MyFavorites(favCarparks),
                       ),
                     );
+                    markersList.clear();
+                    addMarkers(results[0], results[1], 10000, results[3],
+                        results[2], results[4]);
+                    moveCamera(results[0], results[1]);
+                    _polylines.clear();
+                    closest.clear();
+                    closest.add(results);
+                    // }
                     // pushToFavoriteRoute(context);
-                  }),
-              SpeedDialChild(
-                  child: const Icon(Icons.camera, color: Colors.brown),
-                  label: 'Camera',
-                  onTap: () async {
-                    _showTips(context);
-                    // await availableCameras().then((value) {
-                    //   Navigator.of(context).push(MaterialPageRoute(
-                    //       builder: (BuildContext context) =>
-                    //           CameraPage(cameras: value)));
-                    // });
-
-                    // await availableCameras().then((value) => Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (_) => CameraPage(cameras: value))));
                   }),
               SpeedDialChild(
                   child: const Icon(Icons.filter_list, color: Colors.brown),
@@ -540,6 +533,27 @@ class _HomeState extends State<Home> {
                     numCarparksValue = results[1];
                     print(carparkTypeValue);
                     print(numCarparksValue);
+                  }),
+              SpeedDialChild(
+                  child: const Icon(Icons.developer_mode, color: Colors.brown),
+                  label: 'Dev Mode',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            const DevModeScreen(),
+                      ),
+                    );
+                    // await availableCameras().then((value) {
+                    //   Navigator.of(context).push(MaterialPageRoute(
+                    //       builder: (BuildContext context) =>
+                    //           CameraPage(cameras: value)));
+                    // });
+
+                    // await availableCameras().then((value) => Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (_) => CameraPage(cameras: value))));
                   }),
             ],
           ),
@@ -653,8 +667,15 @@ class _HomeState extends State<Home> {
         snippet: 'Carpark Lots: $availLots',
       ),
       onTap: () {
+        var parking_type = "Cars";
+        if (parkingType == "H") {
+          parking_type = "Heavy vehicles";
+        }
+        if (parkingType == "Y") {
+          parking_type = "Motorcycles";
+        }
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Parking Type: $parkingType"),
+          content: Text("Parking Type: $parking_type"),
           action: SnackBarAction(
             label: 'Dismiss',
             textColor: const Color.fromARGB(255, 1, 35, 63),
@@ -764,9 +785,9 @@ class _HomeState extends State<Home> {
         builder: (BuildContext ctx) {
           return AlertDialog(
             title: const Text(
-                "Choose carpark type & carpark number under options"),
+                "Choose carpark type and/or number of carparks displayed under options"),
             content: const Text(
-                'Then, either search using top right search icon or search around users'),
+                'Then, either search your destination using the top right search icon or simply press search around users for carparks around you'),
             actions: [
               TextButton(
                   onPressed: () {

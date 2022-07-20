@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MyFavorites extends StatefulWidget {
   // const MyFavorites({Key? key}) : super(key: key);
 
   final List favCarparks;
-  // final List closest;
 
-  MyFavorites(this.favCarparks); //, this.closest);
+  MyFavorites(this.favCarparks);
 
   @override
   State<MyFavorites> createState() => _MyFavoritesState();
@@ -26,23 +26,24 @@ class _MyFavoritesState extends State<MyFavorites> {
           "Favorite",
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              print(widget.favCarparks);
-              print("___");
-              print(widget.favCarparks.length);
-              print("________");
-              // print(widget.closest);
-            },
-            icon: const Icon(Icons.check),
-          ),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                widget.favCarparks.clear();
-              });
-            },
-            icon: const Icon(Icons.clear),
+          SizedBox(
+            width: 120,
+            child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.red[400],
+                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0.0)),
+                ),
+                onPressed: () {
+                  setState(() {
+                    widget.favCarparks.clear();
+                  });
+                },
+                child: const Text(
+                  "Clear Favs",
+                  style: TextStyle(color: Colors.white),
+                )),
           ),
         ],
         backgroundColor: Colors.brown[400],
@@ -58,22 +59,28 @@ class _MyFavoritesState extends State<MyFavorites> {
             return ListTile(
               title: Text(widget.favCarparks[index][3]),
               subtitle: Text("Carpark Lots: ${widget.favCarparks[index][2]}"),
-              leading: CircleAvatar(
-                  backgroundImage: NetworkImage(
-                      "https://images.unsplash.com/photo-1547721064-da6cfb341d50")),
-              trailing: Icon(
-                isSaved ? Icons.favorite : Icons.favorite_border,
-                color: isSaved ? Colors.red : null,
+              leading: IconButton(
+                icon: const Icon(
+                  Icons.gps_fixed_sharp,
+                  color: Colors.orange,
+                ),
+                onPressed: () {
+                  Navigator.pop(context, widget.favCarparks[index]);
+                },
               ),
-              onTap: () {
-                setState(() {
-                  if (isSaved) {
-                    widget.favCarparks.remove(savedFavs);
-                  } else {
-                    widget.favCarparks.add(savedFavs);
-                  }
-                });
-              },
+              trailing: IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: (() {
+                  setState(() {
+                    if (isSaved) {
+                      widget.favCarparks.remove(savedFavs);
+                    } else {
+                      widget.favCarparks.add(savedFavs);
+                    }
+                  });
+                }),
+              ),
+              onTap: () {},
             );
           }),
     );
