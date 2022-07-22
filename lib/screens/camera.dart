@@ -2,6 +2,7 @@ import 'package:aikeen_park/screens/previewcam.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({Key? key, required this.cameras}) : super(key: key);
@@ -40,7 +41,7 @@ class _CameraPageState extends State<CameraPage> {
     }
     try {
       await _cameraController.setFlashMode(FlashMode.off);
-      XFile picture = await _cameraController.takePicture();
+      XFile? picture = await _cameraController.takePicture();
       print("taken");
       Navigator.push(
           context,
@@ -70,7 +71,16 @@ class _CameraPageState extends State<CameraPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Take picture here')),
+      appBar: AppBar(
+        title: Text(
+          'Take picture here',
+          style: GoogleFonts.montserrat(
+            fontSize: 30,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.brown[400],
+      ),
       body: SafeArea(
         child: Stack(
           children: [

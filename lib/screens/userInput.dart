@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:aikeen_park/screens/camera.dart';
+import 'package:aikeen_park/screens/preview2.dart';
+import 'package:aikeen_park/screens/previewcam.dart';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +23,7 @@ class _userInputState extends State<userInput> {
   @override
   Widget build(BuildContext context) {
     final firestoreInstance = FirebaseFirestore.instance;
+
     void addData() {
       firestoreInstance.collection("userinput").add(
         {
@@ -49,6 +52,7 @@ class _userInputState extends State<userInput> {
     //     return e;
     //   }
     // }
+    XFile? picture;
 
     return Scaffold(
       appBar: AppBar(
@@ -105,32 +109,22 @@ class _userInputState extends State<userInput> {
                 // alignment: Alignment.center,
                 child: GestureDetector(
                   onTap: () async {
-                    await availableCameras().then((value) {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              CameraPage(cameras: value)));
+                    await availableCameras().then((value) async {
+                      picture = await Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  CameraPage(cameras: value)));
                     });
                     // await availableCameras().then((value) => Navigator.push(
                     //     context,
                     //     MaterialPageRoute(
                     //         builder: (_) => CameraPage(cameras: value))));
+                    // print(picture.name);
                   },
                   child: CircleAvatar(
                     radius: 55,
                     backgroundColor: Color(0xffFDCF09),
-                    child:
-                        // _photo != null
-                        //     ? ClipRRect(
-                        //         borderRadius: BorderRadius.circular(50),
-                        //         child: Image.file(
-                        //           _photo!,
-                        //           width: 100,
-                        //           height: 100,
-                        //           fit: BoxFit.fitHeight,
-                        //         ),
-                        //       )
-                        //     :
-                        Container(
+                    child: Container(
                       decoration: BoxDecoration(
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(50)),
@@ -145,11 +139,29 @@ class _userInputState extends State<userInput> {
                 ),
               ),
               ElevatedButton(
+                onPressed: () {
+                  if (picture != null) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PreviewPage2(
+                                  picture: picture,
+                                  location: locationController.text.toString(),
+                                  description:
+                                      descriptionController.text.toString(),
+                                )));
+                  }
+                },
+                style: ElevatedButton.styleFrom(primary: Colors.brown),
+                child: const Text("Show Preview"),
+              ),
+              ElevatedButton(
                   onPressed: () {
                     // print(firestoreInstance);
                     addData();
                     locationController.clear();
                     descriptionController.clear();
+                    picture = null;
                   },
                   style: ElevatedButton.styleFrom(primary: Colors.brown),
                   child: const Text("Submit")),

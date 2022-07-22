@@ -437,7 +437,7 @@ class _HomeState extends State<Home> {
                 onPressed: () {
                   _showTips(context);
                 },
-                child: const Text("Quick Start"),
+                child: const Text("Quick Guide"),
               ),
             ),
           ),
@@ -490,7 +490,7 @@ class _HomeState extends State<Home> {
                   }),
               SpeedDialChild(
                   child: const Icon(Icons.clear, color: Colors.brown),
-                  label: 'Clear All',
+                  label: 'Clear Map',
                   onTap: () {
                     _showAlert(context);
                   }
@@ -725,7 +725,7 @@ class _HomeState extends State<Home> {
         context: context,
         builder: (BuildContext ctx) {
           return AlertDialog(
-            title: const Text("Clear Everything"),
+            title: const Text("Clear Map"),
             content: const Text(
                 'This will remove all pins and routes, are you sure?'),
             actions: [
@@ -735,7 +735,7 @@ class _HomeState extends State<Home> {
                       closest.clear();
                       markersList.clear();
                       _polylines.clear();
-                      favCarparks.clear();
+                      // favCarparks.clear();
                     });
                     Navigator.of(context).pop();
                   },

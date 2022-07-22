@@ -65,10 +65,11 @@ class _DevModeScreenState extends State<DevModeScreen> {
                   padding: const EdgeInsets.only(top: 10, bottom: 10),
                   child: ListTile(
                     title: Text(
-                      "Description: ${dataList[index]['description']}",
+                      "Location: ${dataList[index]['location']}",
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text("Location: ${dataList[index]['location']}"),
+                    subtitle:
+                        Text("Description: ${dataList[index]['description']}"),
                     leading: IconButton(
                       icon:
                           const Icon(Icons.check, color: Colors.red, size: 30),
