@@ -14,7 +14,7 @@ The AikeenPark app aims to provide Singaporeans greater flexibility in planning 
 2. [Read this guide to set the Android Emulator up](https://developer.android.com/studio/run/managing-avds).
 
 ### Installation
-1. Download the .apk file which can be found in [Releases](https://github.com/maxangyuejun/LifeHack22/releases/) of this repository.
+1. Download the .apk file which can be found in [Releases](https://github.com/maxangyuejun/AikeenPark/releases/tag/v1) of this repository.
 
 2. Launch Android Studio and launch your desired emulator
 
