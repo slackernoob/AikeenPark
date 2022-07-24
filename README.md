@@ -32,7 +32,7 @@ Follow the instructions at https://docs.flutter.dev/get-started/install, https:/
 
 ### Installation
 
-1. Clone the repo `git clone https://git@github.com:maxangyuejun/LifeHack22.git`
+1. Clone the repo `git clone https://git@github.com:maxangyuejun/AikeenPark.git`
 
 2. In your chosen IDE, get all the dependencies using `flutter pub get` in the terminal in your IDE
 
