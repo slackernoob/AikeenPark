@@ -270,7 +270,7 @@ class _HomeState extends State<Home> {
   // ]);
 
   bool switchValue = false;
-  bool isVisible = true;
+  bool isVisible = false;
   bool isSaved = true;
 
   // Initial Selected Value
@@ -296,12 +296,27 @@ class _HomeState extends State<Home> {
 
   // late Position _currentPosition;
 
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  late final String uid;
+
+  void getUserData() {
+    final User user = auth.currentUser!;
+    uid = user.uid;
+    // print('My user uid: $uid');
+    if (uid == '2p05GvsJopRZyAYo96kdWeDESLw1') {
+      setState(() {
+        isVisible = !isVisible;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     markersList.clear();
     _polylines.clear();
     _getCurrentLocation();
+    getUserData();
   }
 
   @override
@@ -320,13 +335,19 @@ class _HomeState extends State<Home> {
         ),
         backgroundColor: Colors.brown[400],
         actions: [
-          // Visibility(
-          //   visible: isVisible,
-          //   child: IconButton(
-          //     onPressed: () {},
-          //     icon: const Icon(Icons.developer_mode),
-          //   ),
-          // ),
+          Visibility(
+            visible: isVisible,
+            child: IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => const DevModeScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.developer_mode),
+            ),
+          ),
           // Switch(
           //   value: switchValue,
           //   onChanged: (value) {
@@ -534,27 +555,27 @@ class _HomeState extends State<Home> {
                     print(carparkTypeValue);
                     print(numCarparksValue);
                   }),
-              SpeedDialChild(
-                  child: const Icon(Icons.developer_mode, color: Colors.brown),
-                  label: 'Dev Mode',
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            const DevModeScreen(),
-                      ),
-                    );
-                    // await availableCameras().then((value) {
-                    //   Navigator.of(context).push(MaterialPageRoute(
-                    //       builder: (BuildContext context) =>
-                    //           CameraPage(cameras: value)));
-                    // });
+              // SpeedDialChild(
+              //     child: const Icon(Icons.developer_mode, color: Colors.brown),
+              //     label: 'Dev Mode',
+              //     onTap: () {
+              //       Navigator.of(context).push(
+              //         MaterialPageRoute(
+              //           builder: (BuildContext context) =>
+              //               const DevModeScreen(),
+              //         ),
+              //       );
+              //       // await availableCameras().then((value) {
+              //       //   Navigator.of(context).push(MaterialPageRoute(
+              //       //       builder: (BuildContext context) =>
+              //       //           CameraPage(cameras: value)));
+              //       // });
 
-                    // await availableCameras().then((value) => Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (_) => CameraPage(cameras: value))));
-                  }),
+              //       // await availableCameras().then((value) => Navigator.push(
+              //       //     context,
+              //       //     MaterialPageRoute(
+              //       //         builder: (_) => CameraPage(cameras: value))));
+              //     }),
             ],
           ),
         ],

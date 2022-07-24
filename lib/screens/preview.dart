@@ -2,15 +2,15 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 
-class PreviewPage2 extends StatelessWidget {
-  const PreviewPage2({
+class PreviewPage extends StatelessWidget {
+  const PreviewPage({
     Key? key,
-    required this.picture,
+    required this.image,
     required this.location,
     required this.description,
   }) : super(key: key);
 
-  final XFile? picture;
+  final File? image;
   final String location;
   final String description;
 
@@ -29,12 +29,12 @@ class PreviewPage2 extends StatelessWidget {
             Text("Description: $description"),
             const SizedBox(height: 25),
             Image.file(
-              File(picture!.path),
+              image!,
               fit: BoxFit.cover,
               width: 200,
             ),
             const SizedBox(height: 25),
-            Text("Picture Name: ${picture!.name}"),
+            // Text("Picture Name: ${image!.name}"),
           ],
         ),
       ),

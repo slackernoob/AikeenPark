@@ -57,7 +57,6 @@ class _showDirectionsState extends State<showDirections> {
     super.initState();
     widget.getCurrentLocation();
     widget.closest.sort((a, b) => b[2].compareTo(a[2]));
-    // super.initState();
   }
 
   @override
