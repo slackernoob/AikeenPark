@@ -56,28 +56,23 @@ class _userInputState extends State<userInput> {
 
     return Scaffold(
       appBar: AppBar(
-          title: Text(
-            style: GoogleFonts.montserrat(
-              fontSize: 30,
-              color: Colors.white,
-            ),
-            "User Input",
+        title: Text(
+          style: GoogleFonts.montserrat(
+            fontSize: 30,
+            color: Colors.white,
           ),
-          backgroundColor: Colors.brown[400],
-          actions: [
-            IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.arrow_back),
-            ),
-            IconButton(
-              onPressed: () {
-                // getData();
-              },
-              icon: const Icon(Icons.data_array),
-            ),
-          ]),
+          "User Input",
+        ),
+        backgroundColor: Colors.brown[400],
+        // actions: [
+        //   IconButton(
+        //     onPressed: () {
+        //       Navigator.pop(context);
+        //     },
+        //     icon: const Icon(Icons.arrow_back),
+        //   ),
+        // ],
+      ),
       body: Card(
         //elevation: 5,
         child: Container(
@@ -120,6 +115,7 @@ class _userInputState extends State<userInput> {
                     //     MaterialPageRoute(
                     //         builder: (_) => CameraPage(cameras: value))));
                     // print(picture.name);
+                    _showTips(context);
                   },
                   child: CircleAvatar(
                     radius: 55,
@@ -158,6 +154,7 @@ class _userInputState extends State<userInput> {
               ElevatedButton(
                   onPressed: () {
                     // print(firestoreInstance);
+                    _showSubmitMsg(context);
                     addData();
                     locationController.clear();
                     descriptionController.clear();
@@ -170,5 +167,50 @@ class _userInputState extends State<userInput> {
         ),
       ),
     );
+  }
+
+  void _showTips(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: const Text("Click Select Preview to see your feedback"),
+            content: const Text(
+                'Then, press submit if you are okay with the feedback'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Roger',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.red,
+                      )))
+            ],
+          );
+        });
+  }
+
+  void _showSubmitMsg(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: const Text("Thank you for your feedback"),
+            // content: const Text(),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Okay',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.red,
+                      )))
+            ],
+          );
+        });
   }
 }

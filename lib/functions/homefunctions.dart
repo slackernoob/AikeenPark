@@ -1,5 +1,3 @@
-import 'package:aikeen_park/screens/home.dart';
-
 int choosingNumCarparks(int numCarparksValue) {
   if (numCarparksValue == 1) {
     return 5;
