@@ -191,7 +191,7 @@ class _userInputState extends State<userInput> {
                         // },
                         child: CircleAvatar(
                           radius: 55,
-                          backgroundColor: Color(0xffFDCF09),
+                          backgroundColor: const Color(0xffFDCF09),
                           child: image != null
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(50),

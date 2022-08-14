@@ -1,4 +1,3 @@
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 
@@ -34,7 +33,6 @@ class PreviewPage extends StatelessWidget {
               width: 200,
             ),
             const SizedBox(height: 25),
-            // Text("Picture Name: ${image!.name}"),
           ],
         ),
       ),
